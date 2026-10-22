@@ -1,0 +1,56 @@
+name: release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check the tag against VERSION
+        run: |
+          set -e
+          version="$(cat VERSION)"
+          echo "VERSION=$version  tag=$GITHUB_REF_NAME"
+          test "$GITHUB_REF_NAME" = "v$version"
+      - name: Build wheel and sdist
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
+      - name: Checksums
+        run: |
+          cd dist
+          sha256sum * > checksums.txt
+          cat checksums.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*
+
+  # Opt-in. Publishing to PyPI needs a one-time setup that a fresh repository
+  # does not have: register a Trusted Publisher for this repo at
+  # https://pypi.org/manage/project/recallproof/settings/publishing/ (owner
+  # SuperMarioYL, workflow release.yml, environment pypi), then set the
+  # repository variable PYPI_PUBLISH to "true". Left unset, this job is skipped
+  # and the release stays green.
+  pypi:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v') && vars.PYPI_PUBLISH == 'true'
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1

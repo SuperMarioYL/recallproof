@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 300" width="960" height="300" role="img" aria-label="RecallProof name, one advantage line, and a memory row connected to the source event it replays to.">
+  <title>RecallProof — recall attestation for agent memory</title>
+  <desc>RecallProof name, one advantage line, and a memory row connected to the source event it replays to.</desc>
+  <style>
+    :root {
+      --bg: #f6f9fd; --bg2: #ffffff; --grid: rgba(28,58,118,0.10); --line: rgba(24,54,110,0.24);
+      --text: #0d1a2e; --muted: #5b6f8c; --primary: #0a7ea4; --secondary: #6d3fd4;
+      --good: #0f8a5f; --bad: #c0392b; --warn: #9a6206; --surface: rgba(255,255,255,0.88);
+    }
+    .frame { fill: var(--bg); }
+    .node { fill: var(--surface); stroke: var(--line); stroke-width: 1.2; }
+    .node-accent { fill: var(--surface); stroke: var(--primary); stroke-width: 1.6; }
+    .node-dashed { fill: var(--surface); stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 5 5; }
+    .gridline { stroke: var(--grid); stroke-width: 1; fill: none; }
+    .wire { stroke: var(--line); stroke-width: 1.4; fill: none; }
+    .wire-strong { stroke: var(--primary); stroke-width: 1.6; fill: none; opacity: .8; }
+    text { font-family: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif; }
+    .name { fill: var(--text); font-size: 46px; font-weight: 700; letter-spacing: -0.5px; }
+    .sub { fill: var(--muted); font-size: 19px; }
+    .adv { fill: var(--primary); font-size: 16px; font-weight: 600; }
+    .h { fill: var(--text); font-size: 15px; font-weight: 700; }
+    .t { fill: var(--text); font-size: 14px; }
+    .m { fill: var(--muted); font-size: 13px; }
+    .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13px; fill: var(--text); }
+    .chip { font-size: 12px; font-weight: 700; letter-spacing: .4px; }
+    .kicker { fill: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 1.6px; }
+    .kicker-tight { fill: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+    .dot { fill: var(--primary); }
+    .dot-alt { fill: var(--secondary); }
+    .particle { fill: var(--primary); opacity: .45; animation: converge 7s cubic-bezier(.5,0,.2,1) infinite; }
+    .particle-b { fill: var(--secondary); opacity: .4; animation: converge 9s cubic-bezier(.5,0,.2,1) infinite; }
+    @keyframes converge {
+      0%   { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+      25%  { opacity: .8; }
+      100% { transform: translate(0px, 0px); opacity: 0; }
+    }
+    .pulse { animation: travel 3.6s linear infinite; }
+    @keyframes travel {
+      0%   { transform: translate(var(--px0), var(--py0)); opacity: 0; }
+      15%  { opacity: 1; }
+      85%  { opacity: 1; }
+      100% { transform: translate(var(--px1), var(--py1)); opacity: 0; }
+    }
+    .breathe { animation: breathe 4.5s ease-in-out infinite; }
+    @keyframes breathe { 0%,100% { opacity: .3; } 50% { opacity: .8; } }
+    .spin { animation: spin 30s linear infinite; transform-origin: center; transform-box: fill-box; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .crawl { stroke-dasharray: 5 7; animation: crawl 2.4s linear infinite; }
+    @keyframes crawl { to { stroke-dashoffset: -24; } }
+    .fade1 { animation: fade 5s ease-in-out infinite; }
+    .fade2 { animation: fade 5s ease-in-out infinite; animation-delay: -1.7s; }
+    .fade3 { animation: fade 5s ease-in-out infinite; animation-delay: -3.4s; }
+    @keyframes fade { 0%,100% { opacity: .3; } 50% { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) {
+      .particle, .particle-b, .pulse, .breathe, .spin, .crawl,
+      .fade1, .fade2, .fade3 { animation: none; }
+      .particle, .particle-b { opacity: .4; }
+      .pulse { opacity: .9; }
+    }
+</style>
+  <defs>
+    <linearGradient id="wash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="var(--bg)"/><stop offset="1" stop-color="var(--bg2)"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path class="gridline" d="M32 0 L0 0 0 32"/>
+    </pattern>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="var(--primary)" stop-opacity=".5"/>
+      <stop offset="1" stop-color="var(--primary)" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect class="frame" x="0" y="0" width="960" height="300"/>
+  <rect x="0" y="0" width="960" height="300" fill="url(#wash)"/>
+  <rect x="0" y="0" width="960" height="300" fill="url(#grid)"/>
+  <circle cx="800" cy="150" r="190" fill="url(#glow)" class="breathe"/>
+  <g>
+    <circle class="particle-b" cx="700" cy="150" r="2.0" style="--dx:-240px;--dy:-80px;animation-delay:-0.00s"/>
+    <circle class="particle" cx="700" cy="150" r="2.7" style="--dx:-180px;--dy:66px;animation-delay:-0.55s"/>
+    <circle class="particle-b" cx="700" cy="150" r="3.4" style="--dx:-130px;--dy:-128px;animation-delay:-1.10s"/>
+    <circle class="particle" cx="700" cy="150" r="2.0" style="--dx:-64px;--dy:112px;animation-delay:-1.65s"/>
+    <circle class="particle-b" cx="700" cy="150" r="2.7" style="--dx:-290px;--dy:26px;animation-delay:-2.20s"/>
+    <circle class="particle" cx="700" cy="150" r="3.4" style="--dx:-26px;--dy:-102px;animation-delay:-2.75s"/>
+    <circle class="particle-b" cx="700" cy="150" r="2.0" style="--dx:-220px;--dy:130px;animation-delay:-3.30s"/>
+    <circle class="particle" cx="700" cy="150" r="2.7" style="--dx:-92px;--dy:-36px;animation-delay:-3.85s"/>
+    <circle class="particle-b" cx="700" cy="150" r="3.4" style="--dx:-276px;--dy:-140px;animation-delay:-4.40s"/>
+    <circle class="particle" cx="700" cy="150" r="2.0" style="--dx:-156px;--dy:8px;animation-delay:-4.95s"/>
+    <circle class="particle-b" cx="700" cy="150" r="2.7" style="--dx:-54px;--dy:54px;animation-delay:-5.50s"/>
+    <circle class="particle" cx="700" cy="150" r="3.4" style="--dx:-196px;--dy:-54px;animation-delay:-6.05s"/>
+  </g>
+  <g transform="translate(700,150)">
+    <rect class="node" x="-88" y="-46" width="176" height="92" rx="14"/>
+    <text class="kicker" x="-72" y="-24">MEMORY ROW</text>
+    <rect x="-72" y="-14" width="144" height="9" rx="4.5" fill="var(--primary)" opacity=".85" class="fade1"/>
+    <rect x="-72" y="2" width="116" height="9" rx="4.5" fill="var(--primary)" opacity=".55" class="fade2"/>
+    <rect x="-72" y="18" width="86" height="9" rx="4.5" fill="var(--primary)" opacity=".35" class="fade3"/>
+  </g>
+  <g transform="translate(874,150)">
+    <rect class="node-accent" x="-62" y="-34" width="124" height="68" rx="12"/>
+    <text class="kicker-tight" x="-48" y="-12">SOURCE EVENT</text>
+    <text class="m" x="-48" y="6">line 2 · block 1</text>
+    <text class="m" x="-48" y="22">chars 109:202</text>
+  </g>
+  <path class="wire-strong" d="M788 150 H812"/>
+  <circle class="dot pulse" r="4" cx="788" cy="150" style="--px0:0px;--py0:0px;--px1:24px;--py1:0px"/>
+  <text class="kicker" x="56" y="86">RECALL ATTESTATION FOR AGENT MEMORY</text>
+  <text class="name" x="56" y="146">RecallProof</text>
+  <text class="sub" x="56" y="180">Make every recalled row prove its source event.</text>
+  <rect x="56" y="200" width="54" height="3" rx="1.5" fill="var(--primary)"/>
+  <text class="adv" x="56" y="232">Challenge a recall, get a machine-checkable verdict.</text>
+  <text class="m" x="56" y="254">Re-derived from the raw transcript — no model call.</text>
+</svg>

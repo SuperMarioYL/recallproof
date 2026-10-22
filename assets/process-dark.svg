@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 380" width="960" height="380" role="img" aria-label="Ordered stages: challenge, resolve pointer, re-derive, verdict, with branches to UNSUPPORTED_DERIVATION, NOT_DERIVABLE and DERIVED, and the unused judge lane.">
+  <title>RecallProof core process — four ordered stages and the branches they take</title>
+  <desc>Ordered stages: challenge, resolve pointer, re-derive, verdict, with branches to UNSUPPORTED_DERIVATION, NOT_DERIVABLE and DERIVED, and the unused judge lane.</desc>
+  <style>
+    :root {
+      --bg: #070c18; --bg2: #0e1729; --grid: rgba(122,164,224,0.10); --line: rgba(150,182,232,0.30);
+      --text: #e8eefb; --muted: #8fa2c0; --primary: #38d9f0; --secondary: #8b7cf6;
+      --good: #3ddc97; --bad: #ff6b6b; --warn: #f5c451; --surface: rgba(18,30,52,0.72);
+    }
+    .frame { fill: var(--bg); }
+    .node { fill: var(--surface); stroke: var(--line); stroke-width: 1.2; }
+    .node-accent { fill: var(--surface); stroke: var(--primary); stroke-width: 1.6; }
+    .node-dashed { fill: var(--surface); stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 5 5; }
+    .gridline { stroke: var(--grid); stroke-width: 1; fill: none; }
+    .wire { stroke: var(--line); stroke-width: 1.4; fill: none; }
+    .wire-strong { stroke: var(--primary); stroke-width: 1.6; fill: none; opacity: .8; }
+    text { font-family: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif; }
+    .name { fill: var(--text); font-size: 46px; font-weight: 700; letter-spacing: -0.5px; }
+    .sub { fill: var(--muted); font-size: 19px; }
+    .adv { fill: var(--primary); font-size: 16px; font-weight: 600; }
+    .h { fill: var(--text); font-size: 15px; font-weight: 700; }
+    .t { fill: var(--text); font-size: 14px; }
+    .m { fill: var(--muted); font-size: 13px; }
+    .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13px; fill: var(--text); }
+    .chip { font-size: 12px; font-weight: 700; letter-spacing: .4px; }
+    .kicker { fill: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 1.6px; }
+    .kicker-tight { fill: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+    .dot { fill: var(--primary); }
+    .dot-alt { fill: var(--secondary); }
+    .particle { fill: var(--primary); opacity: .45; animation: converge 7s cubic-bezier(.5,0,.2,1) infinite; }
+    .particle-b { fill: var(--secondary); opacity: .4; animation: converge 9s cubic-bezier(.5,0,.2,1) infinite; }
+    @keyframes converge {
+      0%   { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+      25%  { opacity: .8; }
+      100% { transform: translate(0px, 0px); opacity: 0; }
+    }
+    .pulse { animation: travel 3.6s linear infinite; }
+    @keyframes travel {
+      0%   { transform: translate(var(--px0), var(--py0)); opacity: 0; }
+      15%  { opacity: 1; }
+      85%  { opacity: 1; }
+      100% { transform: translate(var(--px1), var(--py1)); opacity: 0; }
+    }
+    .breathe { animation: breathe 4.5s ease-in-out infinite; }
+    @keyframes breathe { 0%,100% { opacity: .3; } 50% { opacity: .8; } }
+    .spin { animation: spin 30s linear infinite; transform-origin: center; transform-box: fill-box; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .crawl { stroke-dasharray: 5 7; animation: crawl 2.4s linear infinite; }
+    @keyframes crawl { to { stroke-dashoffset: -24; } }
+    .fade1 { animation: fade 5s ease-in-out infinite; }
+    .fade2 { animation: fade 5s ease-in-out infinite; animation-delay: -1.7s; }
+    .fade3 { animation: fade 5s ease-in-out infinite; animation-delay: -3.4s; }
+    @keyframes fade { 0%,100% { opacity: .3; } 50% { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) {
+      .particle, .particle-b, .pulse, .breathe, .spin, .crawl,
+      .fade1, .fade2, .fade3 { animation: none; }
+      .particle, .particle-b { opacity: .4; }
+      .pulse { opacity: .9; }
+    }
+</style>
+  <defs>
+    <linearGradient id="wash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="var(--bg)"/><stop offset="1" stop-color="var(--bg2)"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path class="gridline" d="M32 0 L0 0 0 32"/>
+    </pattern>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="var(--primary)" stop-opacity=".5"/>
+      <stop offset="1" stop-color="var(--primary)" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect class="frame" x="0" y="0" width="960" height="380"/>
+  <rect x="0" y="0" width="960" height="380" fill="url(#wash)"/>
+  <rect x="0" y="0" width="960" height="380" fill="url(#grid)"/>
+  <text class="kicker" x="22" y="42">CORE PROCESS</text>
+  <g transform="translate(56,96)">
+    <rect class="node-accent" x="0" y="0" width="192" height="84" rx="12"/>
+    <circle cx="22" cy="21" r="11" fill="var(--primary)" opacity=".22"/>
+    <text class="chip" x="22" y="25" text-anchor="middle" fill="var(--primary)">1</text>
+    <text class="h" x="42" y="26">challenge</text>
+    <text class="m" x="16" y="54">one row at a time</text>
+  </g>
+  <path class="wire-strong" d="M248 138 H272"/>
+  <circle class="dot pulse" r="3.5" cx="248" cy="138" style="--px0:0px;--py0:0px;--px1:24px;--py1:0px"/>
+  <g transform="translate(280,96)">
+    <rect class="node-accent" x="0" y="0" width="192" height="84" rx="12"/>
+    <circle cx="22" cy="21" r="11" fill="var(--primary)" opacity=".22"/>
+    <text class="chip" x="22" y="25" text-anchor="middle" fill="var(--primary)">2</text>
+    <text class="h" x="42" y="26">resolve pointer</text>
+    <text class="m" x="16" y="54">exact text in a block</text>
+  </g>
+  <path class="wire-strong" d="M472 138 H496"/>
+  <circle class="dot pulse" r="3.5" cx="472" cy="138" style="--px0:0px;--py0:0px;--px1:24px;--py1:0px"/>
+  <g transform="translate(504,96)">
+    <rect class="node-accent" x="0" y="0" width="192" height="84" rx="12"/>
+    <circle cx="22" cy="21" r="11" fill="var(--primary)" opacity=".22"/>
+    <text class="chip" x="22" y="25" text-anchor="middle" fill="var(--primary)">3</text>
+    <text class="h" x="42" y="26">re-derive</text>
+    <text class="m" x="16" y="54">slice span, match bytes</text>
+  </g>
+  <path class="wire-strong" d="M696 138 H720"/>
+  <circle class="dot pulse" r="3.5" cx="696" cy="138" style="--px0:0px;--py0:0px;--px1:24px;--py1:0px"/>
+  <g transform="translate(728,96)">
+    <rect class="node-accent" x="0" y="0" width="192" height="84" rx="12"/>
+    <circle cx="22" cy="21" r="11" fill="var(--primary)" opacity=".22"/>
+    <text class="chip" x="22" y="25" text-anchor="middle" fill="var(--primary)">4</text>
+    <text class="h" x="42" y="26">verdict</text>
+    <text class="m" x="16" y="54">machine-checkable</text>
+  </g>
+  <path class="wire crawl" d="M152 180 V236"/>
+  <g transform="translate(56,240)">
+    <rect class="node" x="0" y="0" width="192" height="60" rx="10"/>
+    <text class="t" x="16" y="26" fill="var(--warn)">abstractive row</text>
+    <text class="m" x="16" y="46">UNSUPPORTED_DERIVATION</text>
+  </g>
+  <path class="wire crawl" d="M376 180 V236"/>
+  <g transform="translate(280,240)">
+    <rect class="node" x="0" y="0" width="192" height="60" rx="10"/>
+    <text class="t" x="16" y="26" fill="var(--muted)">no matching event</text>
+    <text class="m" x="16" y="46">NOT_DERIVABLE</text>
+  </g>
+  <path class="wire crawl" d="M600 180 V236"/>
+  <g transform="translate(504,240)">
+    <rect class="node" x="0" y="0" width="192" height="60" rx="10"/>
+    <text class="t" x="16" y="26" fill="var(--good)">span reproduces text</text>
+    <text class="m" x="16" y="46">DERIVED</text>
+  </g>
+  <path class="wire crawl" d="M828 180 V236"/>
+  <g transform="translate(736,240)">
+    <rect class="node-dashed" x="0" y="0" width="176" height="60" rx="10"/>
+    <text class="t" x="16" y="26" fill="var(--muted)">LLM judge lane</text>
+    <text class="m" x="16" y="46">not used — no model call</text>
+  </g>
+  <text class="kicker" x="22" y="330">BRANCHES — WHAT A ROW GETS INSTEAD OF A GUESS</text>
+</svg>

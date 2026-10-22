@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" width="960" height="400" role="img" aria-label="Layer diagram: the session JSONL and memory rows feed transcript, ledger, rederive and challenge, which emit the verdict table, JSON, the pointer index and rederive.">
+  <title>RecallProof architecture — one process, four modules, flat files</title>
+  <desc>Layer diagram: the session JSONL and memory rows feed transcript, ledger, rederive and challenge, which emit the verdict table, JSON, the pointer index and rederive.</desc>
+  <style>
+    :root {
+      --bg: #070c18; --bg2: #0e1729; --grid: rgba(122,164,224,0.10); --line: rgba(150,182,232,0.30);
+      --text: #e8eefb; --muted: #8fa2c0; --primary: #38d9f0; --secondary: #8b7cf6;
+      --good: #3ddc97; --bad: #ff6b6b; --warn: #f5c451; --surface: rgba(18,30,52,0.72);
+    }
+    .frame { fill: var(--bg); }
+    .node { fill: var(--surface); stroke: var(--line); stroke-width: 1.2; }
+    .node-accent { fill: var(--surface); stroke: var(--primary); stroke-width: 1.6; }
+    .node-dashed { fill: var(--surface); stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 5 5; }
+    .gridline { stroke: var(--grid); stroke-width: 1; fill: none; }
+    .wire { stroke: var(--line); stroke-width: 1.4; fill: none; }
+    .wire-strong { stroke: var(--primary); stroke-width: 1.6; fill: none; opacity: .8; }
+    text { font-family: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif; }
+    .name { fill: var(--text); font-size: 46px; font-weight: 700; letter-spacing: -0.5px; }
+    .sub { fill: var(--muted); font-size: 19px; }
+    .adv { fill: var(--primary); font-size: 16px; font-weight: 600; }
+    .h { fill: var(--text); font-size: 15px; font-weight: 700; }
+    .t { fill: var(--text); font-size: 14px; }
+    .m { fill: var(--muted); font-size: 13px; }
+    .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13px; fill: var(--text); }
+    .chip { font-size: 12px; font-weight: 700; letter-spacing: .4px; }
+    .kicker { fill: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 1.6px; }
+    .kicker-tight { fill: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+    .dot { fill: var(--primary); }
+    .dot-alt { fill: var(--secondary); }
+    .particle { fill: var(--primary); opacity: .45; animation: converge 7s cubic-bezier(.5,0,.2,1) infinite; }
+    .particle-b { fill: var(--secondary); opacity: .4; animation: converge 9s cubic-bezier(.5,0,.2,1) infinite; }
+    @keyframes converge {
+      0%   { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+      25%  { opacity: .8; }
+      100% { transform: translate(0px, 0px); opacity: 0; }
+    }
+    .pulse { animation: travel 3.6s linear infinite; }
+    @keyframes travel {
+      0%   { transform: translate(var(--px0), var(--py0)); opacity: 0; }
+      15%  { opacity: 1; }
+      85%  { opacity: 1; }
+      100% { transform: translate(var(--px1), var(--py1)); opacity: 0; }
+    }
+    .breathe { animation: breathe 4.5s ease-in-out infinite; }
+    @keyframes breathe { 0%,100% { opacity: .3; } 50% { opacity: .8; } }
+    .spin { animation: spin 30s linear infinite; transform-origin: center; transform-box: fill-box; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .crawl { stroke-dasharray: 5 7; animation: crawl 2.4s linear infinite; }
+    @keyframes crawl { to { stroke-dashoffset: -24; } }
+    .fade1 { animation: fade 5s ease-in-out infinite; }
+    .fade2 { animation: fade 5s ease-in-out infinite; animation-delay: -1.7s; }
+    .fade3 { animation: fade 5s ease-in-out infinite; animation-delay: -3.4s; }
+    @keyframes fade { 0%,100% { opacity: .3; } 50% { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) {
+      .particle, .particle-b, .pulse, .breathe, .spin, .crawl,
+      .fade1, .fade2, .fade3 { animation: none; }
+      .particle, .particle-b { opacity: .4; }
+      .pulse { opacity: .9; }
+    }
+</style>
+  <defs>
+    <linearGradient id="wash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="var(--bg)"/><stop offset="1" stop-color="var(--bg2)"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path class="gridline" d="M32 0 L0 0 0 32"/>
+    </pattern>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="var(--primary)" stop-opacity=".5"/>
+      <stop offset="1" stop-color="var(--primary)" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect class="frame" x="0" y="0" width="960" height="400"/>
+  <rect x="0" y="0" width="960" height="400" fill="url(#wash)"/>
+  <rect x="0" y="0" width="960" height="400" fill="url(#grid)"/>
+  <text class="kicker" x="22" y="42">ONE PROCESS · FOUR MODULES · FLAT FILES</text>
+  <g transform="translate(56,86)">
+    <rect class="node-accent" x="0" y="0" width="238" height="124" rx="11"/>
+    <text class="h" x="16" y="30">Claude Code session</text>
+    <text class="mono" x="16" y="54">~/.claude/projects/</text>
+    <text class="mono" x="16" y="72">&lt;slug&gt;/&lt;sessionId&gt;.jsonl</text>
+    <text class="m" x="16" y="98">the shared upstream that</text>
+    <text class="m" x="16" y="114">both memory stores read</text>
+  </g>
+
+  <g transform="translate(56,238)">
+    <rect class="node" x="0" y="0" width="238" height="76" rx="11"/>
+    <text class="h" x="16" y="30">Memory rows</text>
+    <text class="m" x="16" y="52">row_id · text · derivation</text>
+    <text class="m" x="16" y="70">exported from any store</text>
+  </g>
+
+  <path class="wire" d="M294 148 H330 V124 H360"/>
+  <path class="wire" d="M294 276 H330 V192 H360"/>
+  <path class="wire" d="M330 124 V276"/>
+  <circle class="dot pulse" r="3.5" cx="330" cy="200" style="--px0:0px;--py0:-70px;--px1:0px;--py1:70px"/>
+  <circle class="dot-alt pulse" r="3.5" cx="660" cy="124" style="--px0:0px;--py0:0px;--px1:40px;--py1:0px"/>
+  <g transform="translate(360,96)">
+    <rect class="node" x="0" y="0" width="300" height="56" rx="10"/>
+    <text class="mono" x="16" y="24">transcript.py</text>
+    <text class="m" x="16" y="43">session JSONL → ordered event log</text>
+    <text class="chip" x="284" y="24" text-anchor="end" fill="var(--primary)">read-only</text>
+  </g>
+  <path class="wire" d="M660 124 H700"/>
+  <path class="wire-strong" d="M505 156 l5 6 l5 -6"/>
+  <g transform="translate(360,164)">
+    <rect class="node" x="0" y="0" width="300" height="56" rx="10"/>
+    <text class="mono" x="16" y="24">ledger.py</text>
+    <text class="m" x="16" y="43">pins each row to a SourceRef</text>
+    <text class="chip" x="284" y="24" text-anchor="end" fill="var(--primary)">sha256 per line</text>
+  </g>
+  <path class="wire" d="M660 192 H700"/>
+  <path class="wire-strong" d="M505 224 l5 6 l5 -6"/>
+  <g transform="translate(360,232)">
+    <rect class="node" x="0" y="0" width="300" height="56" rx="10"/>
+    <text class="mono" x="16" y="24">rederive.py</text>
+    <text class="m" x="16" y="43">pure (event, ref) → Verdict</text>
+    <text class="chip" x="284" y="24" text-anchor="end" fill="var(--primary)">deterministic</text>
+  </g>
+  <path class="wire" d="M660 260 H700"/>
+  <path class="wire-strong" d="M505 292 l5 6 l5 -6"/>
+  <g transform="translate(360,300)">
+    <rect class="node" x="0" y="0" width="300" height="56" rx="10"/>
+    <text class="mono" x="16" y="24">challenge.py + cli.py</text>
+    <text class="m" x="16" y="43">table, --json, exit code</text>
+    <text class="chip" x="284" y="24" text-anchor="end" fill="var(--primary)">batch verdicts</text>
+  </g>
+  <path class="wire" d="M660 328 H700"/>
+  <g transform="translate(700,96)">
+    <rect class="node" x="0" y="0" width="204" height="56" rx="10"/>
+    <text class="t" x="16" y="24">verdict table</text>
+    <text class="m" x="16" y="43">DERIVED · NOT_DERIVABLE</text>
+  </g>
+  <g transform="translate(700,164)">
+    <rect class="node" x="0" y="0" width="204" height="56" rx="10"/>
+    <text class="t" x="16" y="24">challenge --json</text>
+    <text class="m" x="16" y="43">schema_version 1 · exit 0/1</text>
+  </g>
+  <g transform="translate(700,232)">
+    <rect class="node" x="0" y="0" width="204" height="56" rx="10"/>
+    <text class="t" x="16" y="24">pointers.jsonl</text>
+    <text class="m" x="16" y="43">sidecar · no store written</text>
+  </g>
+  <g transform="translate(700,300)">
+    <rect class="node" x="0" y="0" width="204" height="56" rx="10"/>
+    <text class="t" x="16" y="24">rederive &lt;row_id&gt;</text>
+    <text class="m" x="16" y="43">event + span, or exit 1</text>
+  </g>
+  <text class="m" x="700" y="384">nothing is written back</text>
+</svg>

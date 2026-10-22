@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" width="960" height="440" role="img" aria-label="Connected layout: read-only inputs and memory-store exports feed RecallProof, which exposes the verdict table, JSON, the pointer index and the gate.">
+  <title>RecallProof capabilities and integration</title>
+  <desc>Connected layout: read-only inputs and memory-store exports feed RecallProof, which exposes the verdict table, JSON, the pointer index and the gate.</desc>
+  <style>
+    :root {
+      --bg: #f6f9fd; --bg2: #ffffff; --grid: rgba(28,58,118,0.10); --line: rgba(24,54,110,0.24);
+      --text: #0d1a2e; --muted: #5b6f8c; --primary: #0a7ea4; --secondary: #6d3fd4;
+      --good: #0f8a5f; --bad: #c0392b; --warn: #9a6206; --surface: rgba(255,255,255,0.88);
+    }
+    .frame { fill: var(--bg); }
+    .node { fill: var(--surface); stroke: var(--line); stroke-width: 1.2; }
+    .node-accent { fill: var(--surface); stroke: var(--primary); stroke-width: 1.6; }
+    .node-dashed { fill: var(--surface); stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 5 5; }
+    .gridline { stroke: var(--grid); stroke-width: 1; fill: none; }
+    .wire { stroke: var(--line); stroke-width: 1.4; fill: none; }
+    .wire-strong { stroke: var(--primary); stroke-width: 1.6; fill: none; opacity: .8; }
+    text { font-family: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif; }
+    .name { fill: var(--text); font-size: 46px; font-weight: 700; letter-spacing: -0.5px; }
+    .sub { fill: var(--muted); font-size: 19px; }
+    .adv { fill: var(--primary); font-size: 16px; font-weight: 600; }
+    .h { fill: var(--text); font-size: 15px; font-weight: 700; }
+    .t { fill: var(--text); font-size: 14px; }
+    .m { fill: var(--muted); font-size: 13px; }
+    .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13px; fill: var(--text); }
+    .chip { font-size: 12px; font-weight: 700; letter-spacing: .4px; }
+    .kicker { fill: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 1.6px; }
+    .kicker-tight { fill: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+    .dot { fill: var(--primary); }
+    .dot-alt { fill: var(--secondary); }
+    .particle { fill: var(--primary); opacity: .45; animation: converge 7s cubic-bezier(.5,0,.2,1) infinite; }
+    .particle-b { fill: var(--secondary); opacity: .4; animation: converge 9s cubic-bezier(.5,0,.2,1) infinite; }
+    @keyframes converge {
+      0%   { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+      25%  { opacity: .8; }
+      100% { transform: translate(0px, 0px); opacity: 0; }
+    }
+    .pulse { animation: travel 3.6s linear infinite; }
+    @keyframes travel {
+      0%   { transform: translate(var(--px0), var(--py0)); opacity: 0; }
+      15%  { opacity: 1; }
+      85%  { opacity: 1; }
+      100% { transform: translate(var(--px1), var(--py1)); opacity: 0; }
+    }
+    .breathe { animation: breathe 4.5s ease-in-out infinite; }
+    @keyframes breathe { 0%,100% { opacity: .3; } 50% { opacity: .8; } }
+    .spin { animation: spin 30s linear infinite; transform-origin: center; transform-box: fill-box; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .crawl { stroke-dasharray: 5 7; animation: crawl 2.4s linear infinite; }
+    @keyframes crawl { to { stroke-dashoffset: -24; } }
+    .fade1 { animation: fade 5s ease-in-out infinite; }
+    .fade2 { animation: fade 5s ease-in-out infinite; animation-delay: -1.7s; }
+    .fade3 { animation: fade 5s ease-in-out infinite; animation-delay: -3.4s; }
+    @keyframes fade { 0%,100% { opacity: .3; } 50% { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) {
+      .particle, .particle-b, .pulse, .breathe, .spin, .crawl,
+      .fade1, .fade2, .fade3 { animation: none; }
+      .particle, .particle-b { opacity: .4; }
+      .pulse { opacity: .9; }
+    }
+</style>
+  <defs>
+    <linearGradient id="wash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="var(--bg)"/><stop offset="1" stop-color="var(--bg2)"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path class="gridline" d="M32 0 L0 0 0 32"/>
+    </pattern>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="var(--primary)" stop-opacity=".5"/>
+      <stop offset="1" stop-color="var(--primary)" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect class="frame" x="0" y="0" width="960" height="440"/>
+  <rect x="0" y="0" width="960" height="440" fill="url(#wash)"/>
+  <rect x="0" y="0" width="960" height="440" fill="url(#grid)"/>
+  <text class="kicker" x="22" y="42">READ-ONLY INPUTS · READ-ONLY OUTPUTS</text>
+  <circle class="spin" cx="478" cy="236" r="120" fill="none" stroke="var(--line)" stroke-dasharray="6 10"/>
+  <circle class="spin" cx="478" cy="236" r="178" fill="none" stroke="var(--line)" stroke-dasharray="3 12" opacity=".55"/>
+  <circle cx="478" cy="236" r="92" fill="url(#glow)" class="breathe"/>
+  <g transform="translate(478,236)">
+    <rect class="node-accent" x="-86" y="-52" width="172" height="104" rx="14"/>
+    <text class="h" x="-70" y="-24">recallproof</text>
+    <text class="m" x="-70" y="-4">one process</text>
+    <text class="m" x="-70" y="14">no server, no database</text>
+    <text class="chip" x="-70" y="38" fill="var(--primary)">READ-ONLY</text>
+  </g>
+  <path class="wire-strong" d="M356 236 H392"/>
+  <path class="wire" d="M356 164 H374 V236"/>
+  <path class="wire" d="M356 308 H374 V236"/>
+  <circle class="dot pulse" r="3.5" cx="358" cy="236" style="--px0:0px;--py0:0px;--px1:30px;--py1:0px"/>
+  <path class="wire-strong" d="M564 236 H700"/>
+  <circle class="dot-alt pulse" r="3.5" cx="566" cy="236" style="--px0:0px;--py0:0px;--px1:128px;--py1:0px"/>
+  <g transform="translate(112,136)">
+    <rect class="node" x="0" y="0" width="244" height="56" rx="10"/>
+    <text class="t" x="16" y="24">Claude Code session JSONL</text>
+    <text class="m" x="16" y="43">read-only upstream</text>
+  </g>
+  <g transform="translate(112,208)">
+    <rect class="node" x="0" y="0" width="244" height="56" rx="10"/>
+    <text class="t" x="16" y="24">memory rows JSONL</text>
+    <text class="m" x="16" y="43">row_id · text · derivation</text>
+  </g>
+  <g transform="translate(112,280)">
+    <rect class="node" x="0" y="0" width="244" height="56" rx="10"/>
+    <text class="t" x="16" y="24">pointer index</text>
+    <text class="m" x="16" y="43">sidecar, yours to keep</text>
+  </g>
+  <g transform="translate(700,90)">
+    <rect class="node" x="0" y="0" width="220" height="40" rx="9"/>
+    <text class="m" x="14" y="18">claude-mem export</text>
+    <text class="m" x="14" y="33" opacity=".75">observations</text>
+  </g>
+  <g transform="translate(700,136)">
+    <rect class="node" x="0" y="0" width="220" height="40" rx="9"/>
+    <text class="m" x="14" y="18">mem0 export</text>
+    <text class="m" x="14" y="33" opacity=".75">extracted rows</text>
+  </g>
+  <g transform="translate(700,182)">
+    <rect class="node" x="0" y="0" width="220" height="40" rx="9"/>
+    <text class="m" x="14" y="18">MemPalace export</text>
+    <text class="m" x="14" y="33" opacity=".75">recalled rows</text>
+  </g>
+  <g transform="translate(700,228)">
+    <rect class="node" x="0" y="0" width="220" height="40" rx="9"/>
+    <text class="m" x="14" y="18">challenge --json</text>
+    <text class="m" x="14" y="33" opacity=".75">CI gate</text>
+  </g>
+  <g transform="translate(700,274)">
+    <rect class="node" x="0" y="0" width="220" height="40" rx="9"/>
+    <text class="m" x="14" y="18">rederive &lt;row_id&gt;</text>
+    <text class="m" x="14" y="33" opacity=".75">inspect one row</text>
+  </g>
+  <g transform="translate(700,320)">
+    <rect class="node" x="0" y="0" width="220" height="40" rx="9"/>
+    <text class="m" x="14" y="18">gate --fixture</text>
+    <text class="m" x="14" y="33" opacity=".75">determinism check</text>
+  </g>
+  <text class="m" x="56" y="398">No write path: claude-mem, mem0 and MemPalace keep their own stores — RecallProof reads the exports and the session JSONL.</text>
+  <text class="m" x="56" y="420">Abstractive rows from those exports return UNSUPPORTED_DERIVATION, never a fabricated verdict.</text>
+</svg>

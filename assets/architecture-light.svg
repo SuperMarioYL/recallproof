@@ -144,7 +144,7 @@
   <g transform="translate(700,300)">
     <rect class="node" x="0" y="0" width="204" height="56" rx="10"/>
     <text class="t" x="16" y="24">rederive &lt;row_id&gt;</text>
-    <text class="m" x="16" y="43">event + span, or exit 1</text>
+    <text class="m" x="16" y="43">event + span, or exit non-zero</text>
   </g>
   <text class="m" x="700" y="384">nothing is written back</text>
 </svg>

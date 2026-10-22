@@ -162,13 +162,13 @@ recallproof challenge --session ~/.claude/projects/<slug>/<sessionId>.jsonl --me
 
 # 3. Pin the pointers once, then replay a single row whenever you want.
 recallproof index    --session ~/.claude/projects/<slug>/<sessionId>.jsonl --memory my_rows.jsonl --out pointers.jsonl
-recallproof rederive row_0001 --session ~/.claude/projects/<slug>/<sessionId>.jsonl --pointers pointers.jsonl
+recallproof rederive row_0001 --session ~/.claude/projects/<slug>/<sessionId>.jsonl --memory my_rows.jsonl --pointers pointers.jsonl
 
 # 4. Gate a CI job on it.
 recallproof challenge --session session.jsonl --memory rows.jsonl --json
 ```
 
-`--session` and `--memory` default to the two files in `examples/`, so running from the repository root needs no arguments at all. Every step finishes in under a second; there is no config file, no API key and no network call.
+`challenge` and `index` default `--session` and `--memory` to the two files in `examples/`, so running them from the repository root needs no arguments at all. `rederive` always needs `--memory`, because its verdict is a comparison against the row text. Every step finishes in under a second; there is no config file, no API key and no network call.
 
 ## Demo
 
@@ -176,12 +176,12 @@ recallproof challenge --session session.jsonl --memory rows.jsonl --json
   <img src="./assets/demo.svg" alt="Terminal recording of recallproof challenge: row_0001 DERIVED with its source event and span, row_0002 NOT_DERIVABLE in red" width="100%">
 </p>
 
-That is a real recording of the command above, captured through the terminal renderer rather than drawn by hand — `python scripts/record_demo_svg.py` reproduces it, and `docs/demo-results.json` holds the raw output of every step in this README.
+That is a real recording of the command above, captured through the terminal renderer rather than drawn by hand — `python scripts/record_demo_svg.py` reproduces it, and `docs/demo-results.json` holds the raw output of every step in this README, each recorded at `COLUMNS=100`.
 
 The verdict is inspectable rather than asserted. `rederive` prints the event and the span it sliced:
 
 ```console
-$ recallproof rederive row_0001
+$ recallproof rederive row_0001 --memory examples/memory_rows.jsonl
 DERIVED row_0001
   pinned   line 2 block 1 chars 109:202 uuid 7c4a1e02
   sha256   981858fbc1d114dbef050300738ce0df6c8e79ee5d65ee206646b38d873244b5
@@ -197,11 +197,14 @@ shipments
 and exits non-zero for a row that has nothing to replay:
 
 ```console
-$ recallproof rederive row_0002
-NOT_DERIVABLE row_0002 — examples/pointers.jsonl holds no source event for this row
+$ recallproof rederive row_0002 --memory examples/memory_rows.jsonl
+NOT_DERIVABLE row_0002
+  reason   no session event reproduces this text
 $ echo $?
 1
 ```
+
+`--memory` is required here, and that is the point: the verdict is the comparison between the row text and the slice of the pinned event, so a run without the row text has nothing to compare and refuses to answer (exit `2`) rather than printing a `DERIVED` it cannot back up.
 
 ## Usage
 
@@ -246,7 +249,7 @@ $ recallproof challenge --session examples/session.jsonl --memory examples/memor
 }
 ```
 
-`pinned_by` is `resolved` when the pointer was resolved in this run, `index` when it came from `--pointers`, and `none` when there was nothing to pin.
+`pinned_by` is `resolved` when the pointer was resolved in this run, `index` when it came from `--pointers`, `missing` when an explicit index holds no pin for that row, and `none` when there was nothing to pin.
 
 ### `recallproof index`
 
@@ -255,11 +258,21 @@ $ recallproof index --session examples/session.jsonl --memory examples/memory_ro
 3 rows indexed — 1 pinned, 2 unpinned → examples/pointers.jsonl
 ```
 
-Writes the sidecar pointer index: one record per row, `{"row_id": ..., "source_ref": {...}}`, with `source_ref: null` for a row that could not be pinned. Nothing is annotated in place and no memory store is opened — claude-mem and mem0 are SQLite, so there is no memory file to copy and write onto.
+Writes the sidecar pointer index: one record per row, `{"row_id": ..., "source_ref": {...}}`, with `source_ref: null` for a row that could not be pinned — including every `abstractive` row, which is never pinned. Nothing is annotated in place and no memory store is opened — claude-mem and mem0 are SQLite, so there is no memory file to copy and write onto.
 
 ### `recallproof rederive <row_id>`
 
-Replays one row's pinned event and prints the source event, the span and the reproduced slice, or exits `1`.
+Replays one row's pinned event and prints the source event, the span and the reproduced slice.
+
+| Exit | Meaning |
+| --- | --- |
+| `0` | `DERIVED` — the slice reproduces the row text byte for byte. |
+| `1` | A verdict that is not `DERIVED` (`NOT_DERIVABLE` or `UNSUPPORTED_DERIVATION`). |
+| `2` | The row could not be replayed at all: no row text to compare, or no pin in the index. |
+
+`--memory` is required. The pointer index carries the pointer, not the row text, so `rederive` reads the text from the row file and compares it against the pinned span — the same comparison `challenge` makes. A row id that is not in the row file is reported as `ROW_TEXT_UNAVAILABLE` and exits `2` instead of being judged against whatever text it could find.
+
+The verdict comes from the same `judge_row` the table uses, so `challenge` and `rederive` cannot disagree about a row: an `abstractive` row is `UNSUPPORTED_DERIVATION` in both, never `DERIVED`.
 
 ### `recallproof gate`
 
@@ -270,9 +283,12 @@ $ recallproof gate
 recallproof gate  hand-built fixture — 1 extractive, 1 counterfeit, 1 abstractive row
   PASS  re-derivation is byte-identical across 100/100 runs  (3/3 rows produced one digest each)
   PASS  fixture_derived: extractive row → DERIVED  (DERIVED — b1f0c4d2 L2/B1 · 0:166)
-  PASS  fixture_counterfeit: extractive row → NOT_DERIVABLE  (NOT_DERIVABLE (no session event reproduces this text))
-  PASS  fixture_abstractive: abstractive row → UNSUPPORTED_DERIVATION  (UNSUPPORTED_DERIVATION (row is an abstraction, not a slice of any session event))
-  PASS  a pure re-derivation of the pinned pointer returns DERIVED  (line 2 block 1 chars 0:166 uuid b1f0c4d2)
+  PASS  fixture_counterfeit: extractive row → NOT_DERIVABLE  (NOT_DERIVABLE (no session event 
+reproduces this text))
+  PASS  fixture_abstractive: abstractive row → UNSUPPORTED_DERIVATION  (UNSUPPORTED_DERIVATION (row 
+is an abstraction, not a slice of any session event))
+  PASS  a pure re-derivation of the pinned pointer returns DERIVED  (line 2 block 1 chars 0:166 uuid
+b1f0c4d2)
   PASS  a shortened span fails instead of matching loosely  (span 0:165)
   PASS  a line that changed since it was pinned fails  (pinned sha256 no longer matches the line)
 PASS  7/7 checks
@@ -312,7 +328,8 @@ There is nothing to configure. No config file, no environment variables, no netw
 | --- | --- |
 | Where pointers live | Wherever you pass `--out` / `--pointers`. `examples/pointers.jsonl` is just a default. |
 | Ordering | File line order plus the `parentUuid` chain. No invented sequence numbers. |
-| Duplicate matches | The first match in file order wins. A row that spans two blocks, or that matches several events, is not resolved silently. |
+| Duplicate matches | The first match in file order wins, and that is the event re-derivation replays. A row that spans two blocks is not pinned at all, because no single block contains it. |
+| Abstractive rows | Never pinned, even when the text happens to appear verbatim in the transcript. The index does not carry a pointer for a row the verdict layer refuses to judge. |
 | Line endings | The pinned sha256 is over the JSONL line without its trailing newline, so the same file re-derives on any platform. |
 | What it will not do | Write to a memory store, call a model, fall back to similarity, or invent a verdict it cannot compute. |
 
@@ -332,7 +349,7 @@ Next, in rough order: a read-only adapter that accepts a claude-mem or mem0 expo
 
 ```bash
 uv venv && uv pip install -e ".[dev]"
-python -m pytest                       # 27 tests
+python -m pytest                       # 33 tests
 python scripts/record_demo_svg.py      # re-record assets/demo.svg from a real run
 python scripts/build_figures.py        # regenerate the four figure pairs
 ```

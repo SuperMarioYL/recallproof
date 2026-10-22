@@ -244,7 +244,7 @@ def architecture(theme: str) -> str:
         ("verdict table", "DERIVED · NOT_DERIVABLE"),
         ("challenge --json", "schema_version 1 · exit 0/1"),
         ("pointers.jsonl", "sidecar · no store written"),
-        ("rederive &lt;row_id&gt;", "event + span, or exit 1"),
+        ("rederive &lt;row_id&gt;", "event + span, or exit non-zero"),
     ]
     for index, (title, detail) in enumerate(outputs):
         body += (

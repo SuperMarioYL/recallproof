@@ -162,13 +162,13 @@ recallproof challenge --session ~/.claude/projects/<slug>/<sessionId>.jsonl --me
 
 # 3. 钉一次指针，之后随时重放某一行。
 recallproof index    --session ~/.claude/projects/<slug>/<sessionId>.jsonl --memory my_rows.jsonl --out pointers.jsonl
-recallproof rederive row_0001 --session ~/.claude/projects/<slug>/<sessionId>.jsonl --pointers pointers.jsonl
+recallproof rederive row_0001 --session ~/.claude/projects/<slug>/<sessionId>.jsonl --memory my_rows.jsonl --pointers pointers.jsonl
 
 # 4. 在 CI 里卡住它。
 recallproof challenge --session session.jsonl --memory rows.jsonl --json
 ```
 
-`--session` 和 `--memory` 默认指向 `examples/` 下的两个文件，所以在仓库根目录运行可以不带任何参数。每一步都在一秒内完成；没有配置文件、没有 API Key、没有网络请求。
+`challenge` 和 `index` 的 `--session`、`--memory` 默认指向 `examples/` 下的两个文件，所以在仓库根目录运行可以不带任何参数。`rederive` 始终需要 `--memory`，因为它的判定来自与行文本的比较。每一步都在一秒内完成；没有配置文件、没有 API Key、没有网络请求。
 
 ## 演示
 
@@ -176,12 +176,12 @@ recallproof challenge --session session.jsonl --memory rows.jsonl --json
   <img src="./assets/demo.svg" alt="recallproof challenge 的终端录制：row_0001 为 DERIVED 并给出源事件与区间，row_0002 以红色标出 NOT_DERIVABLE" width="100%">
 </p>
 
-这是上面那条命令的真实录制，用终端渲染器抓出来的，不是手画的——`python scripts/record_demo_svg.py` 可以复现它，`docs/demo-results.json` 里存着本文档每一步的原始输出。
+这是上面那条命令的真实录制，用终端渲染器抓出来的，不是手画的——`python scripts/record_demo_svg.py` 可以复现它，`docs/demo-results.json` 里存着本文档每一步的原始输出，且每一步都录制于 `COLUMNS=100`。
 
 判定是可查的，不是宣称出来的。`rederive` 会把事件和它切出的区间打印出来：
 
 ```console
-$ recallproof rederive row_0001
+$ recallproof rederive row_0001 --memory examples/memory_rows.jsonl
 DERIVED row_0001
   pinned   line 2 block 1 chars 109:202 uuid 7c4a1e02
   sha256   981858fbc1d114dbef050300738ce0df6c8e79ee5d65ee206646b38d873244b5
@@ -197,11 +197,14 @@ shipments
 对一条无从重放的行，它退出非零码：
 
 ```console
-$ recallproof rederive row_0002
-NOT_DERIVABLE row_0002 — examples/pointers.jsonl holds no source event for this row
+$ recallproof rederive row_0002 --memory examples/memory_rows.jsonl
+NOT_DERIVABLE row_0002
+  reason   no session event reproduces this text
 $ echo $?
 1
 ```
+
+这里 `--memory` 是必填的，原因就是产品本身：判定来自「行文本」与「被钉事件的切片」之间的逐字节比较。没有行文本就没有可比的东西，所以它拒绝回答（退出码 `2`），而不是打印一个它无法自证的 `DERIVED`。
 
 ## 用法
 
@@ -246,7 +249,7 @@ $ recallproof challenge --session examples/session.jsonl --memory examples/memor
 }
 ```
 
-`pinned_by` 为 `resolved` 表示指针是本次运行解析出来的，为 `index` 表示来自 `--pointers`，为 `none` 表示没有任何东西可钉。
+`pinned_by` 为 `resolved` 表示指针是本次运行解析出来的，为 `index` 表示来自 `--pointers`，为 `missing` 表示显式传入的索引里没有这一行的钉子，为 `none` 表示没有任何东西可钉。
 
 ### `recallproof index`
 
@@ -255,11 +258,21 @@ $ recallproof index --session examples/session.jsonl --memory examples/memory_ro
 3 rows indexed — 1 pinned, 2 unpinned → examples/pointers.jsonl
 ```
 
-写出旁路指针索引：每行一条记录，`{"row_id": ..., "source_ref": {...}}`，钉不住的行 `source_ref` 为 `null`。它不做原地标注，也不打开任何记忆存储——claude-mem 和 mem0 都是 SQLite，本来就没有一个「记忆文件」可以复制出来写。
+写出旁路指针索引：每行一条记录，`{"row_id": ..., "source_ref": {...}}`，钉不住的行 `source_ref` 为 `null`——包括所有 `abstractive` 行，它们永远不会被钉。它不做原地标注，也不打开任何记忆存储——claude-mem 和 mem0 都是 SQLite，本来就没有一个「记忆文件」可以复制出来写。
 
 ### `recallproof rederive <row_id>`
 
-重放某一行的被钉事件，打印源事件、区间和重放出来的切片，失败则退出 `1`。
+重放某一行的被钉事件，打印源事件、区间和重放出来的切片。
+
+| 退出码 | 含义 |
+| --- | --- |
+| `0` | `DERIVED`——切片与行文本逐字节一致。 |
+| `1` | 判定不是 `DERIVED`（`NOT_DERIVABLE` 或 `UNSUPPORTED_DERIVATION`）。 |
+| `2` | 这一行根本无法重放：没有行文本可比，或索引里没有它的钉子。 |
+
+`--memory` 是必填的。指针索引里只有指针、没有行文本，所以 `rederive` 从行文件里读文本，再和被钉的区间比较——和 `challenge` 做的是同一次比较。如果行文件里没有这个 row id，会报 `ROW_TEXT_UNAVAILABLE` 并退出 `2`，而不是拿它能找到的别的文本来判它。
+
+判定来自与表格同一个 `judge_row`，所以 `challenge` 和 `rederive` 对同一行不可能给出不同结论：`abstractive` 的行在两边都是 `UNSUPPORTED_DERIVATION`，永远不会是 `DERIVED`。
 
 ### `recallproof gate`
 
@@ -270,9 +283,12 @@ $ recallproof gate
 recallproof gate  hand-built fixture — 1 extractive, 1 counterfeit, 1 abstractive row
   PASS  re-derivation is byte-identical across 100/100 runs  (3/3 rows produced one digest each)
   PASS  fixture_derived: extractive row → DERIVED  (DERIVED — b1f0c4d2 L2/B1 · 0:166)
-  PASS  fixture_counterfeit: extractive row → NOT_DERIVABLE  (NOT_DERIVABLE (no session event reproduces this text))
-  PASS  fixture_abstractive: abstractive row → UNSUPPORTED_DERIVATION  (UNSUPPORTED_DERIVATION (row is an abstraction, not a slice of any session event))
-  PASS  a pure re-derivation of the pinned pointer returns DERIVED  (line 2 block 1 chars 0:166 uuid b1f0c4d2)
+  PASS  fixture_counterfeit: extractive row → NOT_DERIVABLE  (NOT_DERIVABLE (no session event 
+reproduces this text))
+  PASS  fixture_abstractive: abstractive row → UNSUPPORTED_DERIVATION  (UNSUPPORTED_DERIVATION (row 
+is an abstraction, not a slice of any session event))
+  PASS  a pure re-derivation of the pinned pointer returns DERIVED  (line 2 block 1 chars 0:166 uuid
+b1f0c4d2)
   PASS  a shortened span fails instead of matching loosely  (span 0:165)
   PASS  a line that changed since it was pinned fails  (pinned sha256 no longer matches the line)
 PASS  7/7 checks
@@ -312,7 +328,8 @@ PASS  7/7 checks
 | --- | --- |
 | 指针放在哪里 | 由你传给 `--out` / `--pointers` 的路径决定。`examples/pointers.jsonl` 只是个默认值。 |
 | 顺序 | 文件行序加 `parentUuid` 链。不编造序号。 |
-| 多处匹配 | 取文件顺序上的第一处匹配。跨两个块的行、或匹配到多个事件的行，不会被悄悄解析。 |
+| 多处匹配 | 取文件顺序上的第一处匹配，重导出重放的就是这一处。跨两个块的行不会被钉——没有任何单个块包含它。 |
+| 抽象行 | 永远不钉，即使它的文本碰巧在 transcript 里逐字出现。判定层拒绝裁判的行，索引里也不会留下它的指针。 |
 | 行尾符 | 被钉住的 sha256 算的是不含行尾换行的那一行 JSONL，所以同一个文件在任何平台都能重导出。 |
 | 它不会做的事 | 写入记忆存储、调用模型、退回相似度、给出一个它算不出来的判定。 |
 
@@ -332,7 +349,7 @@ v0.1 不做的事（列出来是为了把边界写清楚）：终端表格之外
 
 ```bash
 uv venv && uv pip install -e ".[dev]"
-python -m pytest                       # 27 个测试
+python -m pytest                       # 33 个测试
 python scripts/record_demo_svg.py      # 从真实运行重新录制 assets/demo.svg
 python scripts/build_figures.py        # 重新生成四组配图（明/暗）
 ```

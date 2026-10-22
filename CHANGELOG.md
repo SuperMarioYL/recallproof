@@ -16,9 +16,19 @@ The first release. Extractive, turn-level memory rows only.
   CI, and the command exits non-zero when any row failed to prove itself.
 - `recallproof index` — writes the sidecar pointer index that pins each row to
   its source event by `line_index`, `source_uuid` and `event_sha256`. Rows that
-  cannot be pinned are recorded with a null pointer rather than a guess.
+  cannot be pinned are recorded with a null pointer rather than a guess, and an
+  `abstractive` row is never pinned even when its text appears verbatim in the
+  transcript — the index does not carry a pointer for a row the verdict layer
+  refuses to judge.
 - `recallproof rederive <row_id>` — replays one row's pinned event and prints
-  the event, the span and the reproduced slice, or exits non-zero.
+  the event, the span and the reproduced slice. It requires `--memory`, because
+  the verdict is the byte-for-byte comparison between the row text and the
+  sliced span, and the pointer index does not carry the row text; without it the
+  command exits `2` rather than reporting a `DERIVED` it never checked, and a
+  row id the row file does not hold is reported as `ROW_TEXT_UNAVAILABLE`, also
+  with exit `2`. Exits `0` on `DERIVED`, `1` on a verdict that is not `DERIVED`.
+  `rederive` decides through the same `judge_row` as `challenge`, so the two
+  cannot disagree about a row.
 - `recallproof gate` and `python -m recallproof.spike --fixture` — the
   milestone-one gate: re-derivation is byte-identical across 100/100 runs, a
   shortened span and a changed line both fail instead of matching loosely, and an
@@ -30,6 +40,9 @@ The first release. Extractive, turn-level memory rows only.
   instead of an invented sequence number, and records the excluded evidence it
   skipped so a row supported only by a thinking block or tool result is reported
   honestly.
+- `pinned_by: "missing"` in the `challenge` verdict and the `--json` document:
+  a row an explicit pointer index holds no pin for is reported as unpinned, not
+  as a counterfeit whose text no event reproduces.
 - `ledger.py` — the `MemoryRow`, `SourceRef` and `PointerRecord` models, plus
   pinning, index read/write and validation.
 - `rederive.py` — the pure `(event_log, source_ref) -> Verdict` function. No
@@ -46,7 +59,13 @@ The first release. Extractive, turn-level memory rows only.
   MemPalace store, and no memory store is opened.
 - Abstractive rows return `UNSUPPORTED_DERIVATION` by design. A row that cannot
   be checked is not a row that passed, and the tool refuses to guess rather than
-  fall back to the LLM judge it exists to replace.
+  fall back to the LLM judge it exists to replace. `rederive` and `challenge`
+  agree on this because both route through `judge_row`.
+- `DERIVED` is only ever emitted after the sliced span was compared with the row
+  text byte for byte. There is no code path that returns it from a pointer alone.
+- Duplicate matches resolve to the first matching event in file order, and that
+  is the event re-derivation replays. The README states the same rather than
+  claiming an ambiguity check the code does not perform.
 - The demand half of the milestone-one gate is still open: two distinct users in
   120 days describing confabulated memory in their own words. Until that closes,
   this is a working mechanism behind a well-framed hypothesis.

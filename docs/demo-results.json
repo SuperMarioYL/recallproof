@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "recorded_at": "2026-10-23",
   "python": "3.12.13",
-  "environment": "macOS arm64, clean venv, package installed with pip install -e .",
+  "environment": "macOS arm64, clean venv, package installed with pip install -e ., COLUMNS=100",
   "inputs": {
     "session": "examples/session.jsonl",
     "memory": "examples/memory_rows.jsonl",
@@ -19,17 +19,17 @@
     {
       "command": "recallproof index --session examples/session.jsonl --memory examples/memory_rows.jsonl",
       "exit_code": 0,
-      "output": "3 rows indexed — 1 pinned, 2 unpinned → /tmp/rec/pointers.jsonl"
+      "output": "3 rows indexed — 1 pinned, 2 unpinned → examples/pointers.jsonl"
     },
     {
-      "command": "recallproof rederive row_0001",
+      "command": "recallproof rederive row_0001 --memory examples/memory_rows.jsonl",
       "exit_code": 0,
       "output": "DERIVED row_0001\n  pinned   line 2 block 1 chars 109:202 uuid 7c4a1e02\n  sha256   981858fbc1d114dbef050300738ce0df6c8e79ee5d65ee206646b38d873244b5\n  reason   line 2 block 1 chars 109:202 reproduce the row text\n  role     assistant  depth 1\n  event    Decision recorded: the job queue moves to Postgres. One transaction covers enqueue and \nthe row it schedules, which removes the Redis/Postgres dual-write failure mode behind the 03:40 \nduplicate shipments.\n  replay   which removes the Redis/Postgres dual-write failure mode behind the 03:40 duplicate \nshipments"
     },
     {
-      "command": "recallproof rederive row_0002",
+      "command": "recallproof rederive row_0002 --memory examples/memory_rows.jsonl",
       "exit_code": 1,
-      "output": "NOT_DERIVABLE row_0002 — examples/pointers.jsonl holds no source event for this row"
+      "output": "NOT_DERIVABLE row_0002\n  reason   no session event reproduces this text"
     },
     {
       "command": "recallproof challenge --session examples/session.jsonl --memory examples/memory_rows.jsonl --json",
@@ -39,7 +39,7 @@
     {
       "command": "python -m recallproof.spike --fixture",
       "exit_code": 0,
-      "output": "recallproof gate  hand-built fixture — 1 extractive, 1 counterfeit, 1 abstractive row\n  PASS  re-derivation is byte-identical across 100/100 runs  (3/3 rows produced one digest each)\n  PASS  fixture_derived: extractive row → DERIVED  (DERIVED — b1f0c4d2 L2/B1 · 0:166)\n  PASS  fixture_counterfeit: extractive row → NOT_DERIVABLE  (NOT_DERIVABLE (no session event reproduces this text))\n  PASS  fixture_abstractive: abstractive row → UNSUPPORTED_DERIVATION  (UNSUPPORTED_DERIVATION (row is an abstraction, not a slice of any \nsession event))\n  PASS  a pure re-derivation of the pinned pointer returns DERIVED  (line 2 block 1 chars 0:166 uuid b1f0c4d2)\n  PASS  a shortened span fails instead of matching loosely  (span 0:165)\n  PASS  a line that changed since it was pinned fails  (pinned sha256 no longer matches the line)\nPASS  7/7 checks"
+      "output": "recallproof gate  hand-built fixture — 1 extractive, 1 counterfeit, 1 abstractive row\n  PASS  re-derivation is byte-identical across 100/100 runs  (3/3 rows produced one digest each)\n  PASS  fixture_derived: extractive row → DERIVED  (DERIVED — b1f0c4d2 L2/B1 · 0:166)\n  PASS  fixture_counterfeit: extractive row → NOT_DERIVABLE  (NOT_DERIVABLE (no session event \nreproduces this text))\n  PASS  fixture_abstractive: abstractive row → UNSUPPORTED_DERIVATION  (UNSUPPORTED_DERIVATION (row \nis an abstraction, not a slice of any session event))\n  PASS  a pure re-derivation of the pinned pointer returns DERIVED  (line 2 block 1 chars 0:166 uuid\nb1f0c4d2)\n  PASS  a shortened span fails instead of matching loosely  (span 0:165)\n  PASS  a line that changed since it was pinned fails  (pinned sha256 no longer matches the line)\nPASS  7/7 checks"
     }
   ],
   "verdicts": {

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 380" width="960" height="380" role="img" aria-labelledby="t d" data-palette="c7e656-89e76a-f6ebac-0a53b4183f53">
+<title id="t">RecallProof core process — four ordered stages and the branches they take</title><desc id="d">Ordered stages: challenge, resolve pointer, re-derive, verdict, with branches to UNSUPPORTED_DERIVATION, NOT_DERIVABLE and DERIVED, and the unused LLM judge lane.</desc>
+<style>
+  :root{--bg:#090c0d;--panel:#121717;--code:#121713;--ink:#fdfbee;--muted:#acb9a8;
+    --line:#333c1d;--primary:#c7e656;--secondary:#89e76a;--highlight:#f6ebac;}
+  text{font-family:'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;}
+  .kicker{fill:var(--muted);font-size:12px;font-weight:700;letter-spacing:1.7px;}
+  .name{fill:var(--ink);font-size:46px;font-weight:700;letter-spacing:-.6px;}
+  .sub{fill:var(--muted);font-size:19px;}
+  .h{fill:var(--ink);font-size:15px;font-weight:700;}
+  .t{fill:var(--ink);font-size:14px;}
+  .m{fill:var(--muted);font-size:12.5px;}
+  .mono{font-family:ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace;font-size:12.5px;fill:var(--ink);}
+  .chip{font-size:11px;font-weight:700;letter-spacing:.7px;}
+  .card{fill:var(--panel);stroke:var(--line);stroke-width:1.2;}
+  .card-accent{fill:var(--panel);stroke:var(--primary);stroke-width:1.6;}
+  .card-dashed{fill:var(--panel);stroke:var(--muted);stroke-width:1.2;stroke-dasharray:6 5;}
+  .wire{stroke:var(--line);stroke-width:1.5;fill:none;}
+  .wire-strong{stroke:var(--primary);stroke-width:1.7;fill:none;opacity:.85;}
+  .particle{fill:var(--primary);}
+  .particle-alt{fill:var(--secondary);}
+  .pulse{animation:travel 3.8s linear infinite;}
+  .pulse-slow{animation:travel 6s linear infinite;}
+  .breathe{animation:breathe 5s ease-in-out infinite;}
+  .crawl{stroke-dasharray:5 7;animation:crawl 2.6s linear infinite;}
+  .drift{animation:drift 7s ease-in-out infinite alternate;}
+  @keyframes travel{0%{transform:translate(var(--x0),var(--y0));opacity:0}
+    15%{opacity:1}85%{opacity:1}100%{transform:translate(var(--x1),var(--y1));opacity:0}}
+  @keyframes breathe{0%,100%{opacity:.28}50%{opacity:.72}}
+  @keyframes crawl{to{stroke-dashoffset:-24}}
+  @keyframes drift{from{opacity:.35}to{opacity:.9}}
+  @media (prefers-reduced-motion:reduce){.pulse,.pulse-slow,.breathe,.crawl,.drift{animation:none}
+    .breathe{opacity:.5}.pulse,.pulse-slow{opacity:.9}}</style>
+<rect x="0" y="0" width="960" height="380" rx="18" fill="#090c0d"/>
+<text x="22" y="42" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12" fill="var(--muted)" font-weight="700" text-anchor="start" opacity="1">CORE PROCESS</text>
+<g><rect class="card-accent" x="56" y="96" width="192" height="84" rx="12"/>
+  <circle cx="78" cy="117" r="11" fill="#c7e656" opacity=".2"/>
+  <text x="78" y="121" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="11" fill="var(--primary)" font-weight="700" text-anchor="middle" opacity="1">1</text>
+  <text x="98" y="122" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="15" fill="var(--ink)" font-weight="700" text-anchor="start" opacity="1">challenge</text>
+  <text x="72" y="150" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">one row at a time</text></g>
+<path class="wire-strong" d="M248 138 H272"/>
+<circle class="pulse" cx="248" cy="138" r="3.5" fill="#c7e656" style="--x0:0px;--y0:0px;--x1:24px;--y1:0px"/>
+<g><rect class="card-accent" x="280" y="96" width="192" height="84" rx="12"/>
+  <circle cx="302" cy="117" r="11" fill="#c7e656" opacity=".2"/>
+  <text x="302" y="121" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="11" fill="var(--primary)" font-weight="700" text-anchor="middle" opacity="1">2</text>
+  <text x="322" y="122" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="15" fill="var(--ink)" font-weight="700" text-anchor="start" opacity="1">resolve pointer</text>
+  <text x="296" y="150" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">exact text in a block</text></g>
+<path class="wire-strong" d="M472 138 H496"/>
+<circle class="pulse" cx="472" cy="138" r="3.5" fill="#c7e656" style="--x0:0px;--y0:0px;--x1:24px;--y1:0px"/>
+<g><rect class="card-accent" x="504" y="96" width="192" height="84" rx="12"/>
+  <circle cx="526" cy="117" r="11" fill="#c7e656" opacity=".2"/>
+  <text x="526" y="121" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="11" fill="var(--primary)" font-weight="700" text-anchor="middle" opacity="1">3</text>
+  <text x="546" y="122" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="15" fill="var(--ink)" font-weight="700" text-anchor="start" opacity="1">re-derive</text>
+  <text x="520" y="150" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">slice span, match bytes</text></g>
+<path class="wire-strong" d="M696 138 H720"/>
+<circle class="pulse" cx="696" cy="138" r="3.5" fill="#c7e656" style="--x0:0px;--y0:0px;--x1:24px;--y1:0px"/>
+<g><rect class="card-accent" x="728" y="96" width="192" height="84" rx="12"/>
+  <circle cx="750" cy="117" r="11" fill="#c7e656" opacity=".2"/>
+  <text x="750" y="121" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="11" fill="var(--primary)" font-weight="700" text-anchor="middle" opacity="1">4</text>
+  <text x="770" y="122" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="15" fill="var(--ink)" font-weight="700" text-anchor="start" opacity="1">verdict</text>
+  <text x="744" y="150" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">machine-checkable</text></g>
+<path class="wire crawl" d="M152 180 V236"/>
+<g><rect class="card" x="56" y="240" width="192" height="60" rx="12"/><text x="72" y="266" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="14" fill="var(--highlight)" text-anchor="start" opacity="1">abstractive row</text>
+<text x="72" y="286" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">UNSUPPORTED_DERIVATION</text></g>
+<path class="wire crawl" d="M376 180 V236"/>
+<g><rect class="card" x="280" y="240" width="192" height="60" rx="12"/><text x="296" y="266" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="14" fill="var(--secondary)" text-anchor="start" opacity="1">no matching event</text>
+<text x="296" y="286" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">NOT_DERIVABLE</text></g>
+<path class="wire crawl" d="M600 180 V236"/>
+<g><rect class="card" x="504" y="240" width="192" height="60" rx="12"/><text x="520" y="266" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="14" fill="var(--primary)" text-anchor="start" opacity="1">span reproduces text</text>
+<text x="520" y="286" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">DERIVED</text></g>
+<path class="wire crawl" d="M828 180 V236"/>
+<g><rect class="card-dashed" x="736" y="240" width="176" height="60" rx="12"/>
+<text x="752" y="266" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="14" fill="var(--muted)" text-anchor="start" opacity="1">LLM judge lane</text>
+<text x="752" y="286" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">not used — no model call</text></g>
+<text x="22" y="334" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12" fill="var(--muted)" font-weight="700" text-anchor="start" opacity="1">BRANCHES — WHAT A ROW GETS INSTEAD OF A GUESS</text>
+</svg>

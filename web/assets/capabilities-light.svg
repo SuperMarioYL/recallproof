@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" width="960" height="440" role="img" aria-labelledby="t d" data-palette="c7e656-89e76a-f6ebac-0a53b4183f53">
+<title id="t">RecallProof capabilities and integration</title><desc id="d">Connected layout: read-only inputs and memory-store exports feed RecallProof, which exposes the verdict table, JSON, the pointer index and the gate.</desc>
+<style>
+  :root{--bg:#fdfef9;--panel:#fcfef7;--code:#fbfdf3;--ink:#232a1c;--muted:#6a7869;
+    --line:#eef7cb;--primary:#6b7b2e;--secondary:#4d813b;--highlight:#7b7556;}
+  text{font-family:'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;}
+  .kicker{fill:var(--muted);font-size:12px;font-weight:700;letter-spacing:1.7px;}
+  .name{fill:var(--ink);font-size:46px;font-weight:700;letter-spacing:-.6px;}
+  .sub{fill:var(--muted);font-size:19px;}
+  .h{fill:var(--ink);font-size:15px;font-weight:700;}
+  .t{fill:var(--ink);font-size:14px;}
+  .m{fill:var(--muted);font-size:12.5px;}
+  .mono{font-family:ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace;font-size:12.5px;fill:var(--ink);}
+  .chip{font-size:11px;font-weight:700;letter-spacing:.7px;}
+  .card{fill:var(--panel);stroke:var(--line);stroke-width:1.2;}
+  .card-accent{fill:var(--panel);stroke:var(--primary);stroke-width:1.6;}
+  .card-dashed{fill:var(--panel);stroke:var(--muted);stroke-width:1.2;stroke-dasharray:6 5;}
+  .wire{stroke:var(--line);stroke-width:1.5;fill:none;}
+  .wire-strong{stroke:var(--primary);stroke-width:1.7;fill:none;opacity:.85;}
+  .particle{fill:var(--primary);}
+  .particle-alt{fill:var(--secondary);}
+  .pulse{animation:travel 3.8s linear infinite;}
+  .pulse-slow{animation:travel 6s linear infinite;}
+  .breathe{animation:breathe 5s ease-in-out infinite;}
+  .crawl{stroke-dasharray:5 7;animation:crawl 2.6s linear infinite;}
+  .drift{animation:drift 7s ease-in-out infinite alternate;}
+  @keyframes travel{0%{transform:translate(var(--x0),var(--y0));opacity:0}
+    15%{opacity:1}85%{opacity:1}100%{transform:translate(var(--x1),var(--y1));opacity:0}}
+  @keyframes breathe{0%,100%{opacity:.28}50%{opacity:.72}}
+  @keyframes crawl{to{stroke-dashoffset:-24}}
+  @keyframes drift{from{opacity:.35}to{opacity:.9}}
+  @media (prefers-reduced-motion:reduce){.pulse,.pulse-slow,.breathe,.crawl,.drift{animation:none}
+    .breathe{opacity:.5}.pulse,.pulse-slow{opacity:.9}}</style>
+<rect x="0" y="0" width="960" height="440" rx="18" fill="#fdfef9"/>
+<text x="22" y="42" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12" fill="var(--muted)" font-weight="700" text-anchor="start" opacity="1">READ-ONLY INPUTS · READ-ONLY OUTPUTS</text>
+<defs><radialGradient id="core"><stop offset="0" stop-color="#6b7b2e" stop-opacity=".32"/><stop offset="1" stop-color="#6b7b2e" stop-opacity="0"/></radialGradient></defs>
+<circle cx="478" cy="236" r="120" fill="none" stroke="#6b7b2e" stroke-width="1" stroke-dasharray="6 10" opacity=".32" class="crawl"/>
+<circle cx="478" cy="236" r="178" fill="none" stroke="#eef7cb" stroke-width="1" stroke-dasharray="3 12" opacity=".8"/>
+<circle cx="478" cy="236" r="120" fill="url(#core)"/>
+<g><rect class="card-accent" x="392" y="184" width="172" height="104" rx="14"/>
+<text x="408" y="214" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="15" fill="var(--ink)" font-weight="700" text-anchor="start" opacity="1">recallproof</text>
+<text x="408" y="236" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">one process</text>
+<text x="408" y="254" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">no server, no database</text>
+<text x="408" y="276" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="11" fill="var(--primary)" font-weight="700" text-anchor="start" opacity="1">READ-ONLY</text></g>
+<path class="wire-strong" d="M356 236 H392"/>
+<path class="wire" d="M356 164 H374 V236"/>
+<path class="wire" d="M356 308 H374 V236"/>
+<circle class="pulse" cx="358" cy="236" r="3.5" fill="#6b7b2e" style="--x0:0px;--y0:0px;--x1:30px;--y1:0px"/>
+<path class="wire-strong" d="M564 236 H700"/>
+<circle class="pulse-slow" cx="566" cy="236" r="3.5" fill="#4d813b" style="--x0:0px;--y0:0px;--x1:130px;--y1:0px"/>
+<g><rect class="card" x="112" y="136" width="244" height="56" rx="12"/>
+<text x="128" y="160" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="14" fill="var(--ink)" text-anchor="start" opacity="1">Claude Code session JSONL</text>
+<text x="128" y="179" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">read-only upstream</text></g>
+<g><rect class="card" x="112" y="208" width="244" height="56" rx="12"/>
+<text x="128" y="232" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="14" fill="var(--ink)" text-anchor="start" opacity="1">memory rows JSONL</text>
+<text x="128" y="251" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">row_id · text · derivation</text></g>
+<g><rect class="card" x="112" y="280" width="244" height="56" rx="12"/>
+<text x="128" y="304" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="14" fill="var(--ink)" text-anchor="start" opacity="1">pointer index</text>
+<text x="128" y="323" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">sidecar, yours to keep</text></g>
+<g><rect class="card" x="700" y="100" width="220" height="42" rx="9"/>
+<text x="714" y="118" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="12.5" fill="var(--ink)" text-anchor="start" opacity="1">challenge table</text>
+<text x="714" y="133" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="var(--muted)" text-anchor="start" opacity="1">one verdict per row</text></g>
+<g><rect class="card" x="700" y="152" width="220" height="42" rx="9"/>
+<text x="714" y="170" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="12.5" fill="var(--ink)" text-anchor="start" opacity="1">challenge --json</text>
+<text x="714" y="185" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="var(--muted)" text-anchor="start" opacity="1">CI gate</text></g>
+<g><rect class="card" x="700" y="204" width="220" height="42" rx="9"/>
+<text x="714" y="222" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="12.5" fill="var(--ink)" text-anchor="start" opacity="1">pointers.jsonl</text>
+<text x="714" y="237" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="var(--muted)" text-anchor="start" opacity="1">sidecar index</text></g>
+<g><rect class="card" x="700" y="256" width="220" height="42" rx="9"/>
+<text x="714" y="274" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="12.5" fill="var(--ink)" text-anchor="start" opacity="1">rederive &lt;row_id&gt;</text>
+<text x="714" y="289" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="var(--muted)" text-anchor="start" opacity="1">inspect one row</text></g>
+<g><rect class="card" x="700" y="308" width="220" height="42" rx="9"/>
+<text x="714" y="326" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="12.5" fill="var(--ink)" text-anchor="start" opacity="1">gate --fixture</text>
+<text x="714" y="341" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="var(--muted)" text-anchor="start" opacity="1">determinism check</text></g>
+<text x="56" y="398" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12" fill="var(--muted)" text-anchor="start" opacity="1">No write path: claude-mem, mem0 and MemPalace keep their own stores — the row file is a JSONL export you make yourself.</text>
+<text x="56" y="420" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12" fill="var(--muted)" text-anchor="start" opacity="1">Abstractive rows from those exports return UNSUPPORTED_DERIVATION, never a fabricated verdict.</text>
+</svg>

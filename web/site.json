@@ -1,0 +1,356 @@
+{
+  "schema": 3,
+  "name": "RecallProof",
+  "github": "https://github.com/SuperMarioYL/recallproof",
+  "host": "recallproof.lei6393.com",
+  "lang": {
+    "primary": "zh",
+    "toggle": true
+  },
+  "palette": "auto",
+  "hero": {
+    "eyebrow": {
+      "zh": "面向 AI Agent 记忆的召回取证 · 只读 · 零模型调用",
+      "en": "Recall attestation for AI agent memory · read-only · zero model calls"
+    },
+    "headline": {
+      "zh": "让每一条记忆行\n自证来源",
+      "en": "Make every recalled row\nprove its source event"
+    },
+    "sub": {
+      "zh": "三个 LLM 裁判分不出真实的 Agent 记忆和伪造的记忆——裁判读到的正是记忆系统自己产出的那段无锚文本。RecallProof 把每一条被召回的记录重导出到它来源的会话事件，给出三种可机器校验的判定：不调模型，不写任何记忆存储。",
+      "en": "Three LLM judges could not tell a real agent memory from a counterfeit one — a judge reads the same ungrounded text the memory system produced. RecallProof re-derives each recalled row against the session event it came from and returns one of three machine-checkable verdicts. No model call, no write into any memory store."
+    },
+    "href": "#quickstart",
+    "cta": {
+      "zh": "查看快速开始",
+      "en": "See the quickstart"
+    },
+    "ctaGithub": {
+      "zh": "在 GitHub 查看",
+      "en": "View on GitHub"
+    }
+  },
+  "advantages": [
+    {
+      "title": {
+        "zh": "判定来自重导出，不来自裁判",
+        "en": "The verdict comes from re-derivation, not a judge"
+      },
+      "body": {
+        "zh": "rederive.py 是一个纯函数 (event_log, source_ref) -> Verdict：重读被钉住的那一行，切出被钉住的字符区间，逐字节比较。recallproof gate 在抽取式行上跑 100/100 次，判定、区间、事件 uuid 和 sha256 每次完全一致——这个不变量就是产品本身。",
+        "en": "rederive.py is a pure function (event_log, source_ref) -> Verdict: re-read the pinned line, slice the pinned character span, compare byte for byte. recallproof gate re-runs extractive rows 100/100 times and gets an identical verdict, span, event uuid and sha256 every time — that invariant is the product."
+      }
+    },
+    {
+      "title": {
+        "zh": "挂在共享上游，不装进记忆存储",
+        "en": "Attaches at the shared upstream, not inside a memory store"
+      },
+      "body": {
+        "zh": "挂载点是磁盘上的 Claude Code 会话 transcript（~/.claude/projects/<slug>/<sessionId>.jsonl）——各类记忆存储共同消费的那份输入。它是只读的：不打开 claude-mem 或 mem0 的 SQLite，也没有任何写回路径，所以你不需要往记忆存储里装任何东西就能用它。",
+        "en": "The attach point is the on-disk Claude Code session transcript (~/.claude/projects/<slug>/<sessionId>.jsonl) — the one input every memory store consumes. It is read-only: no claude-mem or mem0 SQLite is opened and there is no write path, so nothing has to be installed inside a memory store to use it."
+      }
+    },
+    {
+      "title": {
+        "zh": "三种诚实的判定，拒答也是其中一种",
+        "en": "Three honest verdicts, and refusing is one of them"
+      },
+      "body": {
+        "zh": "DERIVED 表示这一行就是某个会话事件的字节级切片；NOT_DERIVABLE 表示它声称来自该会话，而没有任何事件能复现它；UNSUPPORTED_DERIVATION 表示它根本不是任何事件的切片（AI 压缩摘要、embedding、多事件合并），工具拒绝给它打分，而不是退回它本身否定的那套裁判逻辑。判定也是可查的：rederive <row_id> 打印源事件、字符区间与 sha256，退出码区分三种结果（0 / 1 / 2），challenge --json 给出一份 CI 可以直接卡住的文档。",
+        "en": "DERIVED means the row is a byte-level slice of a real session event; NOT_DERIVABLE means it claims to come from the session and no event reproduces it; UNSUPPORTED_DERIVATION means it is not a slice of any event at all (an AI-compressed summary, an embedding, a merge), so the tool refuses to score it instead of falling back to the judge logic it rejects. The verdict is inspectable too: rederive <row_id> prints the source event, the character span and the sha256, exit codes separate the three outcomes (0 / 1 / 2), and challenge --json emits a document a CI job can gate on."
+      }
+    }
+  ],
+  "demo": {
+    "title": {
+      "zh": "已验证的运行记录",
+      "en": "Verified run records"
+    },
+    "note": {
+      "zh": "以下四步的命令与输出逐字取自 docs/demo-results.json（2026-10-23，macOS arm64 干净 venv，Python 3.12.13，COLUMNS=100）；完整六步记录——包括 challenge 判定表与 --json 文档——就在那个文件里。两个输入都是合成的 fixture，形状与真实的 Claude Code 会话 JSONL 完全一致；仓库不附带任何真实 transcript。",
+      "en": "The commands and outputs of these four steps are copied verbatim from docs/demo-results.json (2026-10-23, clean venv on macOS arm64, Python 3.12.13, COLUMNS=100); the full six-step record — including the challenge verdict table and the --json document — lives in that file. Both inputs are synthetic fixtures shaped exactly like a real Claude Code session JSONL; no real transcript is shipped."
+    },
+    "source": "https://github.com/SuperMarioYL/recallproof/blob/main/docs/demo-results.json",
+    "steps": [
+      {
+        "label": {
+          "zh": "钉住指针",
+          "en": "Pin the pointers"
+        },
+        "body": {
+          "zh": "index 写出旁路指针索引：每行一条记录，钉不住的行 source_ref 为 null——包括所有 abstractive 行，它们永远不会被钉。没有任何东西被原地标注，也没有记忆存储被打开。",
+          "en": "index writes the sidecar pointer index: one record per row, with source_ref null for a row that could not be pinned — including every abstractive row, which is never pinned. Nothing is annotated in place and no memory store is opened."
+        },
+        "image": "/assets/demo-index-light.svg",
+        "imageDark": "/assets/demo-index-dark.svg",
+        "command": "recallproof index --session examples/session.jsonl --memory examples/memory_rows.jsonl",
+        "output": "3 rows indexed — 1 pinned, 2 unpinned → examples/pointers.jsonl"
+      },
+      {
+        "label": {
+          "zh": "重放命中",
+          "en": "Replay hits"
+        },
+        "body": {
+          "zh": "rederive 把判定拆开给你看：被钉的行、字符区间、该行的 sha256、角色与 parentUuid 深度，以及从区间切出来的那段文字——它和被召回的文本逐字节相同。",
+          "en": "rederive opens the verdict up: the pinned line, the character span, that line's sha256, the role and parentUuid depth, and the slice taken from the span — byte for byte the recalled text."
+        },
+        "image": "/assets/demo-rederive-hit-light.svg",
+        "imageDark": "/assets/demo-rederive-hit-dark.svg",
+        "command": "recallproof rederive row_0001 --memory examples/memory_rows.jsonl",
+        "output": "DERIVED row_0001\n  pinned   line 2 block 1 chars 109:202 uuid 7c4a1e02\n  sha256   981858fbc1d114dbef050300738ce0df6c8e79ee5d65ee206646b38d873244b5\n  reason   line 2 block 1 chars 109:202 reproduce the row text\n  role     assistant  depth 1\n  event    Decision recorded: the job queue moves to Postgres. One transaction covers enqueue and \nthe row it schedules, which removes the Redis/Postgres dual-write failure mode behind the 03:40 \nduplicate shipments.\n  replay   which removes the Redis/Postgres dual-write failure mode behind the 03:40 duplicate \nshipments"
+      },
+      {
+        "label": {
+          "zh": "重放失败",
+          "en": "Replay fails"
+        },
+        "body": {
+          "zh": "同一件事在 row_0002 上失败：没有任何会话事件能复现这段文本，退出码 1。判定不是「看起来不像」，而是同一次重放没有找到匹配事件。",
+          "en": "The same operation fails on row_0002: no session event reproduces this text, exit code 1. The verdict is not that it looks wrong — the same replay simply finds no matching event."
+        },
+        "image": "/assets/demo-rederive-miss-light.svg",
+        "imageDark": "/assets/demo-rederive-miss-dark.svg",
+        "command": "recallproof rederive row_0002 --memory examples/memory_rows.jsonl",
+        "output": "NOT_DERIVABLE row_0002\n  reason   no session event reproduces this text"
+      },
+      {
+        "label": {
+          "zh": "确定性闸门",
+          "en": "Determinism gate"
+        },
+        "body": {
+          "zh": "gate 把 m1 的确定性那一半做成一条命令：同一批行重导出 100 次，检查判定、区间、事件 uuid 与 sha256 每次一致；被缩短的区间和被改过的行必须失败而不是宽松匹配；抽象行永远不会被裁判。7/7 通过。",
+          "en": "gate turns the determinism half of m1 into one command: the same rows re-derived 100 times must agree on verdict, span, event uuid and sha256; a shortened span and a changed line must fail rather than match loosely; an abstractive row is never judged. 7/7 pass."
+        },
+        "image": "/assets/demo-gate-light.svg",
+        "imageDark": "/assets/demo-gate-dark.svg",
+        "command": "python -m recallproof.spike --fixture",
+        "output": "recallproof gate  hand-built fixture — 1 extractive, 1 counterfeit, 1 abstractive row\n  PASS  re-derivation is byte-identical across 100/100 runs  (3/3 rows produced one digest each)\n  PASS  fixture_derived: extractive row → DERIVED  (DERIVED — b1f0c4d2 L2/B1 · 0:166)\n  PASS  fixture_counterfeit: extractive row → NOT_DERIVABLE  (NOT_DERIVABLE (no session event \nreproduces this text))\n  PASS  fixture_abstractive: abstractive row → UNSUPPORTED_DERIVATION  (UNSUPPORTED_DERIVATION (row \nis an abstraction, not a slice of any session event))\n  PASS  a pure re-derivation of the pinned pointer returns DERIVED  (line 2 block 1 chars 0:166 uuid\nb1f0c4d2)\n  PASS  a shortened span fails instead of matching loosely  (span 0:165)\n  PASS  a line that changed since it was pinned fails  (pinned sha256 no longer matches the line)\nPASS  7/7 checks"
+      }
+    ]
+  },
+  "quickstart": {
+    "title": {
+      "zh": "快速开始",
+      "en": "Quickstart"
+    },
+    "body": {
+      "zh": "需要 Python 3.12 或更新版本。没有配置文件、没有 API Key、没有网络请求；两个示例输入随仓库提供，所以第一条结果只差一条命令，每一步都在一秒内完成。",
+      "en": "Python 3.12 or newer. No config file, no API key, no network call; both example inputs ship with the repository, so the first result is one command away and every step finishes in under a second."
+    },
+    "steps": [
+      {
+        "title": {
+          "zh": "克隆并安装",
+          "en": "Clone and install"
+        },
+        "code": "git clone https://github.com/SuperMarioYL/recallproof\ncd recallproof\nuv venv && uv pip install -e .        # or: python -m venv .venv && .venv/bin/pip install -e ."
+      },
+      {
+        "title": {
+          "zh": "不克隆，直接从 git 运行",
+          "en": "Run straight from git, no clone"
+        },
+        "code": "uvx --from git+https://github.com/SuperMarioYL/recallproof recallproof challenge \\\n  --session examples/session.jsonl --memory examples/memory_rows.jsonl"
+      },
+      {
+        "title": {
+          "zh": "第一条结果",
+          "en": "Your first result"
+        },
+        "code": "recallproof challenge --session examples/session.jsonl --memory examples/memory_rows.jsonl"
+      },
+      {
+        "title": {
+          "zh": "指向你自己的会话与记忆行",
+          "en": "Point it at your own session and rows"
+        },
+        "code": "# any Claude Code session you already have; read-only, nothing is written\nls ~/.claude/projects/*/*.jsonl\n\n# your recalled rows, one JSON object per line:\n# {\"row_id\": \"row_0001\", \"text\": \"<the recalled text>\", \"derivation\": \"extractive\"}\nrecallproof challenge --session ~/.claude/projects/<slug>/<sessionId>.jsonl --memory my_rows.jsonl"
+      },
+      {
+        "title": {
+          "zh": "钉一次指针，之后随时重放",
+          "en": "Pin the pointers once, replay any row later"
+        },
+        "code": "recallproof index    --session ~/.claude/projects/<slug>/<sessionId>.jsonl --memory my_rows.jsonl --out pointers.jsonl\nrecallproof rederive row_0001 --session ~/.claude/projects/<slug>/<sessionId>.jsonl --memory my_rows.jsonl --pointers pointers.jsonl"
+      },
+      {
+        "title": {
+          "zh": "在 CI 里卡住它",
+          "en": "Gate a CI job on it"
+        },
+        "code": "recallproof challenge --session session.jsonl --memory rows.jsonl --json"
+      }
+    ]
+  },
+  "limitations": [
+    {
+      "zh": "需求证据很薄。这个痛点目前只有一份公开的非同行评审记录（三个 LLM 裁判无法区分真实记忆与伪造记忆）；m1 的需求那一半——120 天内两个不同用户用自己的话描述被编造的记忆——仍然敞开。在它关闭之前，这是一个机制可用、命题清晰的假设，不是已验证的产品。",
+      "en": "The demand evidence is thin. The pain rests on a single public, non-peer-reviewed write-up (three LLM judges unable to separate a real memory from a counterfeit one), and the demand half of m1 — two distinct users within 120 days describing confabulated memory in their own words — is still open. Until it closes, this is a well-framed hypothesis with a working mechanism, not a validated product."
+    },
+    {
+      "zh": "只支持抽取式行。AI 压缩出来的行（claude-mem 的 observations、mem0 抽取式记忆的导出）以 abstractive 进来，返回 UNSUPPORTED_DERIVATION 而不是判定——这是诚实的答案，也是当前的能力边界。",
+      "en": "Extractive rows only. AI-compressed rows (claude-mem observations, mem0 extracted memories) arrive as abstractive and return UNSUPPORTED_DERIVATION instead of a verdict — the honest answer, and the current capability boundary."
+    },
+    {
+      "zh": "只读，没有写回路径。RecallProof 不打开也不写入 claude-mem、mem0 或 MemPalace 的存储，不调用模型，不退回相似度匹配。",
+      "en": "Read-only, with no write-back path. RecallProof neither opens nor writes the claude-mem, mem0 or MemPalace stores, makes no model call, and never falls back to similarity."
+    },
+    {
+      "zh": "每个被钉事件只有一个 sha256。那是「这个被钉事件没有被改过」的篡改证据，不是 append-only 日志，也不是托管式取证日志。",
+      "en": "One sha256 per pinned event is tamper-evidence that the pinned event has not changed — not an append-only log and not a hosted attestation log."
+    },
+    {
+      "zh": "只索引 user / assistant 记录里的 text 块。thinking、tool_use、tool_result 三类块与其他记录类型（attachment、system 等）被排除；唯一证据落在这些地方的行走 UNSUPPORTED_DERIVATION。",
+      "en": "Only the text blocks of user and assistant records are indexed. thinking, tool_use and tool_result blocks and the other record types (attachment, system and similar) are excluded; a row whose only evidence sits there returns UNSUPPORTED_DERIVATION."
+    },
+    {
+      "zh": "v0.1 没有 MCP server、没有 Web UI 或 TUI、没有跨 harness 的可移植记忆格式，也不对抽象行打分。行文件目前需要你从自己的存储导出。",
+      "en": "v0.1 has no MCP server, no web UI or TUI, no portable cross-harness memory format, and does not score abstractive rows. The row file is currently something you export from your own store."
+    }
+  ],
+  "scene": {
+    "kind": "neon-graph",
+    "fallback": "/assets/scene-dark.svg",
+    "fallbackLight": "/assets/scene-light.svg",
+    "caption": {
+      "zh": "示意场景：一条被召回的记录沿指针回到它来源的会话事件",
+      "en": "Illustrative scene: a recalled row tracing back along its pointer to the source session event"
+    }
+  },
+  "story": {
+    "intro": {
+      "title": {
+        "zh": "一条被召回的记录\n没有记录它从哪里来",
+        "en": "A recalled row\ncarries no record of where it came from"
+      },
+      "body": {
+        "zh": "Agent 记忆已经是承重结构：一条被召回的记录——「我们决定用 Postgres」、「那次故障是 token 过期」——越来越常被当作归因依据，写进复盘、事故报告和变更说明。但这条记录里没有任何东西说明它是真的从某个会话事件里抽出来的，还是写它的那个模型编出来的。目前唯一被尝试过的检查手段是 LLM 裁判，而唯一一份公开的尝试是失败的：三个裁判，无法区分真实记忆和伪造记忆。这是结构性问题——裁判读到的正是记忆系统自己产出的那段无锚文本，所以它只能对第一个模型表示同意或不同意，永远无法证明某一行来自某个事件。缺的是一个可机器校验的信号，而一行记忆能给出的诚实答案只有三种。",
+        "en": "Agent memory is load-bearing now: a recalled row — we agreed to use Postgres, the incident was a stale token — is increasingly the reason a decision gets attributed to a session, a postmortem or a change review. Nothing in that row records whether it was derived from a real session event or confabulated by the model that wrote it. The only check anyone has tried is an LLM judge, and the one published attempt failed: three judges, no separation between a real memory and a counterfeit one. That failure is structural — a judge reads the same ungrounded text the memory system produced, so it can only agree or disagree with the first model. What is missing is a machine-checkable signal, and a row has only three honest answers to give."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "zh": "四个有序阶段，没有第二条通道",
+          "en": "Four ordered stages, no second lane"
+        },
+        "body": {
+          "zh": "质询一行 → 解析指针（在该块的文本里精确找到这段文字）→ 重导出（切出被钉区间，逐字节比较）→ 判定。中间没有模型、没有 embedding 相似度、没有裁判通道：抽象的行分支到 UNSUPPORTED_DERIVATION，找不到匹配事件的行分支到 NOT_DERIVABLE，只有区间真的复现了行文本才是 DERIVED。",
+          "en": "Challenge a row → resolve the pointer (find that exact text in the selected block) → re-derive (slice the pinned span, compare bytes) → verdict. No model, no embedding similarity, no judge lane in between: an abstractive row branches to UNSUPPORTED_DERIVATION, a row with no matching event to NOT_DERIVABLE, and only a span that really reproduces the row text is DERIVED."
+        },
+        "image": {
+          "light": "/assets/process-light.svg",
+          "dark": "/assets/process-dark.svg",
+          "alt": {
+            "zh": "四个有序阶段：质询、解析指针、重导出、判定，以及三条分支与未使用的裁判通道",
+            "en": "Four ordered stages — challenge, resolve pointer, re-derive, verdict — with the three branches and the unused judge lane"
+          }
+        }
+      },
+      {
+        "title": {
+          "zh": "一个进程，四个模块，纯 JSONL",
+          "en": "One process, four modules, flat JSONL"
+        },
+        "body": {
+          "zh": "没有服务端、没有数据库、没有第二个二进制。transcript.py 把会话读成有序事件日志，只保留 user/assistant 记录及其 text 块；ledger.py 构建并校验 SourceRef 旁路指针索引，按 sha256 钉住每个被引用的行；rederive.py 是那个纯函数，确定性且不调模型；challenge.py 与 cli.py 负责批量判定、表格或 JSON 输出与退出码。message.content 在两种 role 上都是多态的，所以 span 只有相对某个被选中的 text 块才有意义，block_index 指明是哪一个。",
+          "en": "No server, no database, no second binary. transcript.py reads a session into an ordered event log, keeping only user/assistant records and their text blocks; ledger.py builds and validates the sidecar SourceRef index, pinning each referenced line by sha256; rederive.py is that pure function, deterministic and model-free; challenge.py and cli.py handle batch verdicts, table or JSON output and exit codes. message.content is polymorphic on both roles, so a span is only well-defined relative to a selected text block, and block_index names which one."
+        },
+        "image": {
+          "light": "/assets/architecture-light.svg",
+          "dark": "/assets/architecture-dark.svg",
+          "alt": {
+            "zh": "一个进程、四个模块：transcript.py、ledger.py、rederive.py 与 challenge.py 的数据流",
+            "en": "One process, four modules: the data flow through transcript.py, ledger.py, rederive.py and challenge.py"
+          }
+        }
+      },
+      {
+        "title": {
+          "zh": "只读输入，只读输出",
+          "en": "Read-only inputs, read-only outputs"
+        },
+        "body": {
+          "zh": "输入是你 Agent 本来就在写的 session JSONL，加上你所用的任何存储导出出来的行文件；输出是判定表、--json 文档、旁路指针索引和闸门结果。分工是刻意划清的：记忆存储负责召回质量、压缩与可移植性，RecallProof 只回答一条已经存在的记忆行上的一个问题，并且从不打开它们的 SQLite。",
+          "en": "The inputs are the session JSONL your agent already writes plus a row file exported from whatever store you use; the outputs are the verdict table, the --json document, the sidecar pointer index and the gate result. The division of responsibility is deliberate: memory stores own recall quality, compression and portability, while RecallProof answers one question about a row that already exists — and never opens their SQLite."
+        },
+        "image": {
+          "light": "/assets/capabilities-light.svg",
+          "dark": "/assets/capabilities-dark.svg",
+          "alt": {
+            "zh": "只读输入、记忆存储的导出文件，以及判定表、JSON、指针索引与闸门四类输出",
+            "en": "Read-only inputs, memory-store exports, and the verdict table, JSON, pointer index and gate outputs"
+          }
+        }
+      }
+    ],
+    "details": [
+      {
+        "title": {
+          "zh": "配置：没有可配置的东西",
+          "en": "Configuration: there is nothing to configure"
+        },
+        "body": {
+          "zh": "没有配置文件、没有环境变量、没有网络访问、没有模型供应商。唯一的选择是指针写到哪里（--out / --pointers）、要不要针对已钉住的索引做质询（--pointers），以及表格还是 JSON。",
+          "en": "No config file, no environment variables, no network access, no model provider. The only choices are where the pointers go (--out / --pointers), whether to challenge against a pinned index (--pointers), and table versus JSON."
+        },
+        "code": "recallproof challenge --session ~/.claude/projects/<slug>/<sessionId>.jsonl --memory my_rows.jsonl --json"
+      },
+      {
+        "title": {
+          "zh": "行文件：一行一个 JSON 对象",
+          "en": "The row file: one JSON object per line"
+        },
+        "body": {
+          "zh": "任何存储导出的行都可以进来，只要标好 derivation。abstractive 的行永远不会被钉，索引里不会留下它们的指针——判定层拒绝裁判的行，指针层也不会替它留一条证据。",
+          "en": "Rows exported from any store can come in, as long as derivation is marked. An abstractive row is never pinned and the index carries no pointer for it — a row the verdict layer refuses to judge gets no evidence line from the pointer layer either."
+        },
+        "code": "{\"row_id\": \"row_0001\", \"text\": \"which removes the Redis/Postgres dual-write failure mode behind the 03:40 duplicate shipments\", \"derivation\": \"extractive\"}"
+      },
+      {
+        "title": {
+          "zh": "确定性与边界约定",
+          "en": "Determinism and the boundary rules"
+        },
+        "body": {
+          "zh": "同一批输入永远得到同一个判定：顺序来自文件行序与 parentUuid 链，不编造序号；多处匹配时取文件顺序上的第一处，重放的就是这一处；跨两个块的行不会被钉，因为没有任何单个块包含它；被钉的 sha256 算的是不含行尾换行的那一行，所以同一个文件在任何平台都能重导出。",
+          "en": "The same inputs always produce the same verdict: order comes from file line order and the parentUuid chain, with no invented sequence numbers; on multiple matches the first in file order wins and that is the event re-derivation replays; a row spanning two blocks is not pinned at all, because no single block contains it; the pinned sha256 covers the line without its trailing newline, so the same file re-derives on any platform."
+        }
+      },
+      {
+        "title": {
+          "zh": "它不会做的事",
+          "en": "What it will not do"
+        },
+        "body": {
+          "zh": "不写入任何记忆存储、不调用模型、不退回相似度匹配、不给出一个它算不出来的判定；也没有 MCP server、Web UI、托管式取证日志或跨 harness 的记忆格式。v0.1 把这些列在路线图里，而不是在这里宣称。",
+          "en": "It does not write to any memory store, call a model, fall back to similarity, or invent a verdict it cannot compute; there is also no MCP server, web UI, hosted attestation log or cross-harness memory format. v0.1 lists these on the roadmap rather than claiming them here."
+        }
+      }
+    ]
+  },
+  "cta": {
+    "headline": {
+      "zh": "把「我们当时决定了 X」\n变成一次可重放的重导出",
+      "en": "Turn a recalled claim\ninto a replay you can check"
+    },
+    "sub": {
+      "zh": "只读、零模型调用、一条命令。判定是两个文件本身的属性，所以它可以被复现。",
+      "en": "Read-only, zero model calls, one command. The verdict is a property of the two files on disk, so it reproduces."
+    },
+    "button": {
+      "zh": "在 GitHub 上开始",
+      "en": "Get started on GitHub"
+    }
+  },
+  "footer": {
+    "tag": {
+      "zh": "只读 · 零模型调用 · MIT · 无付费层",
+      "en": "Read-only · zero model calls · MIT · no paid tier"
+    }
+  }
+}

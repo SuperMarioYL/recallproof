@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" width="960" height="400" role="img" aria-labelledby="t d" data-palette="c7e656-89e76a-f6ebac-0a53b4183f53">
+<title id="t">RecallProof architecture — one process, four modules, flat files</title><desc id="d">Layer diagram: the session JSONL and memory rows feed transcript, ledger, rederive and challenge, which emit the verdict table, JSON, the pointer index and rederive.</desc>
+<style>
+  :root{--bg:#090c0d;--panel:#121717;--code:#121713;--ink:#fdfbee;--muted:#acb9a8;
+    --line:#333c1d;--primary:#c7e656;--secondary:#89e76a;--highlight:#f6ebac;}
+  text{font-family:'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;}
+  .kicker{fill:var(--muted);font-size:12px;font-weight:700;letter-spacing:1.7px;}
+  .name{fill:var(--ink);font-size:46px;font-weight:700;letter-spacing:-.6px;}
+  .sub{fill:var(--muted);font-size:19px;}
+  .h{fill:var(--ink);font-size:15px;font-weight:700;}
+  .t{fill:var(--ink);font-size:14px;}
+  .m{fill:var(--muted);font-size:12.5px;}
+  .mono{font-family:ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace;font-size:12.5px;fill:var(--ink);}
+  .chip{font-size:11px;font-weight:700;letter-spacing:.7px;}
+  .card{fill:var(--panel);stroke:var(--line);stroke-width:1.2;}
+  .card-accent{fill:var(--panel);stroke:var(--primary);stroke-width:1.6;}
+  .card-dashed{fill:var(--panel);stroke:var(--muted);stroke-width:1.2;stroke-dasharray:6 5;}
+  .wire{stroke:var(--line);stroke-width:1.5;fill:none;}
+  .wire-strong{stroke:var(--primary);stroke-width:1.7;fill:none;opacity:.85;}
+  .particle{fill:var(--primary);}
+  .particle-alt{fill:var(--secondary);}
+  .pulse{animation:travel 3.8s linear infinite;}
+  .pulse-slow{animation:travel 6s linear infinite;}
+  .breathe{animation:breathe 5s ease-in-out infinite;}
+  .crawl{stroke-dasharray:5 7;animation:crawl 2.6s linear infinite;}
+  .drift{animation:drift 7s ease-in-out infinite alternate;}
+  @keyframes travel{0%{transform:translate(var(--x0),var(--y0));opacity:0}
+    15%{opacity:1}85%{opacity:1}100%{transform:translate(var(--x1),var(--y1));opacity:0}}
+  @keyframes breathe{0%,100%{opacity:.28}50%{opacity:.72}}
+  @keyframes crawl{to{stroke-dashoffset:-24}}
+  @keyframes drift{from{opacity:.35}to{opacity:.9}}
+  @media (prefers-reduced-motion:reduce){.pulse,.pulse-slow,.breathe,.crawl,.drift{animation:none}
+    .breathe{opacity:.5}.pulse,.pulse-slow{opacity:.9}}</style>
+<rect x="0" y="0" width="960" height="400" rx="18" fill="#090c0d"/>
+<text x="22" y="42" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12" fill="var(--muted)" font-weight="700" text-anchor="start" opacity="1">ONE PROCESS · FOUR MODULES · FLAT FILES</text>
+<g><rect class="card-accent" x="56" y="86" width="238" height="124" rx="12"/>
+<text x="72" y="116" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="15" fill="var(--ink)" font-weight="700" text-anchor="start" opacity="1">Claude Code session</text>
+<text x="72" y="140" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="12.5" fill="var(--ink)" text-anchor="start" opacity="1">~/.claude/projects/</text>
+<text x="72" y="158" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="12.5" fill="var(--ink)" text-anchor="start" opacity="1">&lt;slug&gt;/&lt;sessionId&gt;.jsonl</text>
+<text x="72" y="184" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">the shared upstream that</text>
+<text x="72" y="200" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">both memory stores read</text></g>
+<g><rect class="card" x="56" y="238" width="238" height="76" rx="12"/>
+<text x="72" y="268" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="15" fill="var(--ink)" font-weight="700" text-anchor="start" opacity="1">Memory rows</text>
+<text x="72" y="290" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">row_id · text · derivation</text>
+<text x="72" y="308" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">exported from any store</text></g>
+<path class="wire" d="M294 148 H330 V124 H360"/>
+<path class="wire" d="M294 276 H330 V192 H360"/>
+<path class="wire" d="M330 124 V276"/>
+<circle class="pulse" cx="330" cy="200" r="3.5" fill="#c7e656" style="--x0:0px;--y0:0px;--x1:0px;--y1:-70px"/>
+<circle class="pulse-slow" cx="660" cy="124" r="3.5" fill="#89e76a" style="--x0:0px;--y0:0px;--x1:40px;--y1:0px"/>
+<g><rect class="card" x="360" y="96" width="300" height="56" rx="12"/>
+<text x="376" y="120" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="12.5" fill="var(--ink)" text-anchor="start" opacity="1">transcript.py</text>
+<text x="376" y="139" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">session JSONL → ordered event log</text>
+<text x="644" y="120" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="11" fill="var(--primary)" font-weight="700" text-anchor="end" opacity="1">read-only</text></g>
+<path class="wire" d="M660 124 H700"/>
+<path class="wire-strong" d="M505 156 l5 6 l5 -6"/>
+<g><rect class="card" x="360" y="164" width="300" height="56" rx="12"/>
+<text x="376" y="188" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="12.5" fill="var(--ink)" text-anchor="start" opacity="1">ledger.py</text>
+<text x="376" y="207" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">pins each row to a SourceRef</text>
+<text x="644" y="188" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="11" fill="var(--primary)" font-weight="700" text-anchor="end" opacity="1">sha256 per line</text></g>
+<path class="wire" d="M660 192 H700"/>
+<path class="wire-strong" d="M505 224 l5 6 l5 -6"/>
+<g><rect class="card" x="360" y="232" width="300" height="56" rx="12"/>
+<text x="376" y="256" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="12.5" fill="var(--ink)" text-anchor="start" opacity="1">rederive.py</text>
+<text x="376" y="275" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">pure (event, ref) → Verdict</text>
+<text x="644" y="256" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="11" fill="var(--primary)" font-weight="700" text-anchor="end" opacity="1">deterministic</text></g>
+<path class="wire" d="M660 260 H700"/>
+<path class="wire-strong" d="M505 292 l5 6 l5 -6"/>
+<g><rect class="card" x="360" y="300" width="300" height="56" rx="12"/>
+<text x="376" y="324" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="12.5" fill="var(--ink)" text-anchor="start" opacity="1">challenge.py + cli.py</text>
+<text x="376" y="343" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">table, --json, exit code</text>
+<text x="644" y="324" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="11" fill="var(--primary)" font-weight="700" text-anchor="end" opacity="1">batch verdicts</text></g>
+<path class="wire" d="M660 328 H700"/>
+<g><rect class="card" x="700" y="96" width="204" height="56" rx="12"/>
+<text x="716" y="120" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="14" fill="var(--ink)" text-anchor="start" opacity="1">verdict table</text>
+<text x="716" y="139" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">DERIVED · NOT_DERIVABLE</text></g>
+<g><rect class="card" x="700" y="164" width="204" height="56" rx="12"/>
+<text x="716" y="188" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="14" fill="var(--ink)" text-anchor="start" opacity="1">challenge --json</text>
+<text x="716" y="207" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">schema_version 1 · exit 0/1</text></g>
+<g><rect class="card" x="700" y="232" width="204" height="56" rx="12"/>
+<text x="716" y="256" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="14" fill="var(--ink)" text-anchor="start" opacity="1">pointers.jsonl</text>
+<text x="716" y="275" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">sidecar · no store written</text></g>
+<g><rect class="card" x="700" y="300" width="204" height="56" rx="12"/>
+<text x="716" y="324" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="14" fill="var(--ink)" text-anchor="start" opacity="1">rederive &lt;row_id&gt;</text>
+<text x="716" y="343" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">event + span, or exit non-zero</text></g>
+<text x="700" y="384" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--muted)" text-anchor="start" opacity="1">nothing is written back</text>
+</svg>

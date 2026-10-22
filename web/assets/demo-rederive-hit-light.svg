@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" width="760" height="300" role="img" aria-labelledby="t d" data-palette="c7e656-89e76a-f6ebac-0a53b4183f53">
+<title id="t">rederive 命中一条被钉事件（记录步骤 3）</title><desc id="d">Recorded rederive step: the pinned line, its span, sha256 and the reproduced slice.</desc>
+<style>
+  :root{--bg:#fdfef9;--panel:#fcfef7;--code:#fbfdf3;--ink:#232a1c;--muted:#6a7869;
+    --line:#eef7cb;--primary:#6b7b2e;--secondary:#4d813b;--highlight:#7b7556;}
+  text{font-family:'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;}
+  .kicker{fill:var(--muted);font-size:12px;font-weight:700;letter-spacing:1.7px;}
+  .name{fill:var(--ink);font-size:46px;font-weight:700;letter-spacing:-.6px;}
+  .sub{fill:var(--muted);font-size:19px;}
+  .h{fill:var(--ink);font-size:15px;font-weight:700;}
+  .t{fill:var(--ink);font-size:14px;}
+  .m{fill:var(--muted);font-size:12.5px;}
+  .mono{font-family:ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace;font-size:12.5px;fill:var(--ink);}
+  .chip{font-size:11px;font-weight:700;letter-spacing:.7px;}
+  .card{fill:var(--panel);stroke:var(--line);stroke-width:1.2;}
+  .card-accent{fill:var(--panel);stroke:var(--primary);stroke-width:1.6;}
+  .card-dashed{fill:var(--panel);stroke:var(--muted);stroke-width:1.2;stroke-dasharray:6 5;}
+  .wire{stroke:var(--line);stroke-width:1.5;fill:none;}
+  .wire-strong{stroke:var(--primary);stroke-width:1.7;fill:none;opacity:.85;}
+  .particle{fill:var(--primary);}
+  .particle-alt{fill:var(--secondary);}
+  .pulse{animation:travel 3.8s linear infinite;}
+  .pulse-slow{animation:travel 6s linear infinite;}
+  .breathe{animation:breathe 5s ease-in-out infinite;}
+  .crawl{stroke-dasharray:5 7;animation:crawl 2.6s linear infinite;}
+  .drift{animation:drift 7s ease-in-out infinite alternate;}
+  @keyframes travel{0%{transform:translate(var(--x0),var(--y0));opacity:0}
+    15%{opacity:1}85%{opacity:1}100%{transform:translate(var(--x1),var(--y1));opacity:0}}
+  @keyframes breathe{0%,100%{opacity:.28}50%{opacity:.72}}
+  @keyframes crawl{to{stroke-dashoffset:-24}}
+  @keyframes drift{from{opacity:.35}to{opacity:.9}}
+  @media (prefers-reduced-motion:reduce){.pulse,.pulse-slow,.breathe,.crawl,.drift{animation:none}
+    .breathe{opacity:.5}.pulse,.pulse-slow{opacity:.9}}</style>
+<rect x="0" y="0" width="760" height="300" rx="18" fill="#fdfef9"/>
+<rect x="0" y="0" width="760" height="300" rx="18" fill="#fdfef9"/><text x="24" y="38" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="13" fill="var(--ink)" font-weight="700" text-anchor="start" opacity="1">recallproof rederive row_0001</text>
+<text x="24" y="58" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12" fill="var(--muted)" text-anchor="start" opacity="1">line 2 · block 1 · chars 109:202 — the slice is compared byte for byte</text>
+<rect class="card" x="24" y="74" width="712" height="96" rx="10"/>
+<text x="40" y="100" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="11" fill="var(--muted)" text-anchor="start" opacity="1">Decision recorded: the job queue moves to Postgres. One transaction covers enqueue and the row it schedules, </text>
+<rect x="40" y="108" width="300" height="20" rx="4" fill="#6b7b2e" opacity=".18"/>
+<text x="40" y="123" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="11" fill="var(--ink)" text-anchor="start" opacity="1">which removes the Redis/Postgres dual-write failure </text>
+<text x="40" y="145" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="11" fill="var(--ink)" text-anchor="start" opacity="1">mode behind the 03:40 duplicate shipments</text>
+<rect x="38" y="150" width="270.5999999999999" height="2" fill="var(--primary)" opacity=".8"/>
+<text x="40" y="164" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="var(--primary)" text-anchor="start" opacity="1">↑ chars 109:202 = the recalled row text, byte for byte</text>
+<rect class="card" x="24" y="182" width="344" height="54" rx="10"/>
+<text x="40" y="204" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="11.5" fill="var(--ink)" text-anchor="start" opacity="1">sha256 981858fbc1d114dbe…</text>
+<text x="40" y="224" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace" font-size="11.5" fill="var(--muted)" text-anchor="start" opacity="1">role assistant · depth 1</text>
+<rect class="card" x="392" y="182" width="344" height="54" rx="10"/>
+<text x="408" y="204" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="var(--primary)" font-weight="700" text-anchor="start" opacity="1">DERIVED · exit 0</text>
+<text x="408" y="224" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="var(--muted)" text-anchor="start" opacity="1">the pinned event replayed to the row text</text>
+<text x="24" y="272" font-family="'Space Grotesk', -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="12" fill="var(--muted)" text-anchor="start" opacity="1">the verdict is the comparison, not an opinion about the text</text>
+</svg>

@@ -1,0 +1,38 @@
+{
+  "mode": "auto",
+  "id": "c7e656-89e76a-f6ebac-0a53b4183f53",
+  "identity": "https://github.com/supermarioyl/recallproof",
+  "primary": "#c7e656",
+  "secondary": "#89e76a",
+  "highlight": "#f6ebac",
+  "dark": {
+    "bg": "#090c0d",
+    "panel": "#121717",
+    "code": "#121713",
+    "ink": "#fdfbee",
+    "muted": "#acb9a8",
+    "line": "#333c1d",
+    "primary": "#c7e656",
+    "secondary": "#89e76a",
+    "highlight": "#f6ebac",
+    "accent": "#c7e656",
+    "buttonStart": "#6d7d2f",
+    "buttonEnd": "#4e833c",
+    "buttonText": "#ffffff"
+  },
+  "light": {
+    "bg": "#fdfef9",
+    "panel": "#fcfef7",
+    "code": "#fbfdf3",
+    "ink": "#232a1c",
+    "muted": "#6a7869",
+    "line": "#eef7cb",
+    "primary": "#6b7b2e",
+    "secondary": "#4d813b",
+    "highlight": "#7b7556",
+    "accent": "#6b7b2e",
+    "buttonStart": "#6d7d2f",
+    "buttonEnd": "#4e833c",
+    "buttonText": "#ffffff"
+  }
+}

@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "recallproof"
+version = "0.1.0"
+description = "Recall attestation for AI agent memory: replay every recalled row to its source session event."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+authors = [{ name = "SuperMarioYL" }]
+keywords = ["agent-memory", "provenance", "attestation", "claude-code", "llm", "cli"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Quality Assurance",
+  "Topic :: System :: Logging",
+]
+dependencies = [
+  "typer>=0.12.3",
+  "rich>=13.7.1",
+  "pydantic>=2.7.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.2.0"]
+
+[project.urls]
+Homepage = "https://github.com/SuperMarioYL/recallproof"
+Repository = "https://github.com/SuperMarioYL/recallproof"
+Issues = "https://github.com/SuperMarioYL/recallproof/issues"
+
+[project.scripts]
+recallproof = "recallproof.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/recallproof"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

@@ -6,6 +6,11 @@ the slice with the row text byte-for-byte. No model call, no embedding, no
 second opinion — the verdict is a property of the files, so it is the same on
 every run and on every machine.
 
+``expected_text`` is required, and that is deliberate: the row text is the one
+thing the verdict is about. Without it there is nothing to compare the slice
+with, so a caller that does not have it must say so instead of receiving a
+``DERIVED`` it cannot back up.
+
 The verdict is one of three honest states:
 
 ``DERIVED``
@@ -62,13 +67,13 @@ def unsupported(reason: str) -> Derivation:
 def rederive(
     event_log: Sequence[TranscriptEvent],
     source_ref: SourceRef,
-    expected_text: str | None = None,
+    expected_text: str,
 ) -> Derivation:
     """Replay ``source_ref`` against ``event_log`` and return a verdict.
 
-    Pure: the same ``event_log`` and ``source_ref`` always produce the same
-    :class:`Derivation`. ``expected_text`` is optional so the function can also
-    answer "does this pinned pointer still resolve?" on its own.
+    Pure: the same ``event_log``, ``source_ref`` and ``expected_text`` always
+    produce the same :class:`Derivation`. ``DERIVED`` is only ever returned
+    after the sliced span was compared with ``expected_text`` byte-for-byte.
     """
     event = next(
         (
@@ -118,7 +123,7 @@ def rederive(
         )
 
     reproduced = event.text[start:end]
-    if expected_text is not None and reproduced != expected_text:
+    if reproduced != expected_text:
         return Derivation(
             verdict=Verdict.NOT_DERIVABLE,
             reason="span no longer reproduces the row text",

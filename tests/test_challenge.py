@@ -36,6 +36,13 @@ def verdicts():
     return challenge(load_transcript(SESSION), load_memory_rows(MEMORY))
 
 
+def _index_into(tmp_path: Path) -> Path:
+    """Write the shipped rows into a pointer index in ``tmp_path``."""
+    out = tmp_path / "pointers.jsonl"
+    runner.invoke(app, ["index", "-s", str(SESSION), "-m", str(MEMORY), "-o", str(out)])
+    return out
+
+
 def test_sample_session_has_one_derived_and_one_not_derivable(verdicts):
     by_id = {item.row_id: item for item in verdicts}
     assert by_id["row_0001"].verdict is Verdict.DERIVED
@@ -153,7 +160,86 @@ def test_cli_index_then_rederive(tmp_path: Path):
         app,
         ["rederive", "row_9999", "-s", str(SESSION), "-m", str(MEMORY), "-p", str(out)],
     )
-    assert unknown.exit_code == 1
+    assert unknown.exit_code == 2
+    assert "ROW_TEXT_UNAVAILABLE" in unknown.stdout
+
+
+def test_cli_rederive_will_not_verdict_without_the_row_text(tmp_path: Path):
+    """No ``--memory`` means no text to compare, so it must never print DERIVED."""
+    out = _index_into(tmp_path)
+    result = runner.invoke(app, ["rederive", "row_0001", "-s", str(SESSION), "-p", str(out)])
+    assert result.exit_code == 2
+    assert "DERIVED" not in result.stdout
+    assert "--memory is required" in result.stdout
+
+
+def test_cli_rederive_reports_a_row_it_has_no_text_for(tmp_path: Path):
+    """A row absent from the memory file is unpinned, not silently DERIVED."""
+    out = _index_into(tmp_path)
+    other = tmp_path / "other_rows.jsonl"
+    other.write_text(
+        json.dumps({"row_id": "someone_elses_row", "text": "Ship it."}) + "\n",
+        encoding="utf-8",
+    )
+    result = runner.invoke(
+        app, ["rederive", "row_0001", "-s", str(SESSION), "-m", str(other), "-p", str(out)]
+    )
+    assert result.exit_code == 2
+    assert "ROW_TEXT_UNAVAILABLE" in result.stdout
+    assert "DERIVED" not in result.stdout
+
+
+def test_cli_rederive_fails_on_a_row_edited_after_indexing(tmp_path: Path):
+    """The tampered-text case: the same pointer must not still print DERIVED."""
+    out = _index_into(tmp_path)
+    row = load_memory_rows(MEMORY)[0].model_dump()
+    row["text"] = f"{row['text']} AND DELETE PROD."
+    tampered = tmp_path / "tampered.jsonl"
+    tampered.write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = runner.invoke(
+        app,
+        ["rederive", "row_0001", "-s", str(SESSION), "-m", str(tampered), "-p", str(out)],
+    )
+    assert result.exit_code == 1
+    assert "NOT_DERIVABLE" in result.stdout
+    assert "span no longer reproduces the row text" in result.stdout
+
+
+def test_cli_rederive_agrees_with_challenge_on_every_shipped_row(tmp_path: Path):
+    """``challenge`` and ``rederive`` must return the same verdict for a row."""
+    out = _index_into(tmp_path)
+    pinned = {
+        item.row_id: item
+        for item in challenge(load_transcript(SESSION), load_memory_rows(MEMORY), load_index(out))
+    }
+    assert pinned["row_0003"].verdict is Verdict.UNSUPPORTED_DERIVATION
+
+    for row_id, expected in pinned.items():
+        result = runner.invoke(
+            app,
+            ["rederive", row_id, "-s", str(SESSION), "-m", str(MEMORY), "-p", str(out)],
+        )
+        assert result.exit_code == (0 if expected.verdict.ok else 1), row_id
+        assert result.stdout.splitlines()[0].startswith(expected.verdict.value), row_id
+
+
+def test_row_absent_from_a_partial_index_is_not_reported_as_counterfeit():
+    """A row the index holds no pin for is unpinned, not a proven counterfeit."""
+    transcript = load_transcript(SESSION)
+    rows = load_memory_rows(MEMORY)
+    in_transcript = rows[0].model_copy(update={"row_id": "not_in_the_index"})
+    assert build_index(transcript, [in_transcript])[0].source_ref is not None
+
+    partial = [record for record in build_index(transcript, rows) if record.row_id == "row_0001"]
+    verdicts = {
+        item.row_id: item for item in challenge(transcript, [in_transcript], partial)
+    }
+    missing = verdicts["not_in_the_index"]
+    assert missing.verdict is Verdict.NOT_DERIVABLE
+    assert missing.pinned_by == "missing"
+    assert "pointer index" in missing.note
+    assert "no session event reproduces" not in missing.reason
 
 
 def test_cli_gate_passes_on_the_hand_built_fixture():

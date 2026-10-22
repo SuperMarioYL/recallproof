@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import tempfile
 from pathlib import Path
+from typing import NoReturn
 
 import typer
 from rich.console import Console
@@ -16,9 +17,11 @@ from rich.table import Table
 
 from . import __version__
 from .challenge import (
+    PIN_INDEX,
     RowVerdict,
     challenge,
     exit_code,
+    judge_row,
     verdicts_payload,
 )
 from .ledger import (
@@ -28,13 +31,17 @@ from .ledger import (
     load_memory_rows,
     write_index,
 )
-from .rederive import Verdict, rederive
+from .rederive import Verdict
 from .spike import DEFAULT_RUNS, FIXTURE_EXPECTATIONS, run_gate, write_fixture
 from .transcript import TranscriptError, load_transcript
 
 DEFAULT_SESSION = Path("examples/session.jsonl")
 DEFAULT_MEMORY = Path("examples/memory_rows.jsonl")
 DEFAULT_POINTERS = Path("examples/pointers.jsonl")
+
+# ``rederive`` exits 2 when it has no row text to compare, so a "cannot replay"
+# is never mistaken for the verdict ``NOT_DERIVABLE`` (exit 1).
+EXIT_NO_ROW_TEXT = 2
 
 VERDICT_STYLE = {
     Verdict.DERIVED: "bold green",
@@ -68,7 +75,7 @@ def main_callback(
     """Recall attestation for AI agent memory."""
 
 
-def _fail(console: Console, message: str, code: int = 2) -> None:
+def _fail(console: Console, message: str, code: int = 2) -> NoReturn:
     console.print(f"[bold red]error:[/bold red] {message}")
     raise typer.Exit(code)
 
@@ -170,45 +177,55 @@ def index_cmd(
 def rederive_cmd(
     row_id: str = typer.Argument(..., help="The memory row to replay."),
     session: Path = typer.Option(DEFAULT_SESSION, "--session", "-s", help="Claude Code session JSONL."),
-    memory: Path = typer.Option(DEFAULT_MEMORY, "--memory", "-m", help="Memory rows as JSONL."),
+    memory: Path | None = typer.Option(
+        None,
+        "--memory",
+        "-m",
+        help="Memory rows as JSONL. Required: the verdict compares the row text byte for byte, and the pointer index does not carry it.",
+    ),
     pointers: Path = typer.Option(DEFAULT_POINTERS, "--pointers", "-p", help="Pointer index to read."),
 ) -> None:
-    """Replay one row's pinned event and print the source span, or exit non-zero."""
+    """Replay one row's pinned event and print the source span, or exit non-zero.
+
+    Exits 0 on ``DERIVED``, 1 on a verdict that is not ``DERIVED``, and 2 when
+    the row could not be replayed at all — no row text to compare, or no pin in
+    the index.
+    """
     console = Console()
-    for label, path in (("session", session), ("pointers", pointers)):
+    if memory is None:
+        _fail(console, "--memory is required: rederive needs the row text to compare")
+    for label, path in (("session", session), ("memory", memory), ("pointers", pointers)):
         if not path.is_file():
             _fail(console, f"{label} file not found: {path}")
+
     transcript = load_transcript(session)
-    records = {record.row_id: record for record in load_index(pointers)}
-    record = records.get(row_id)
-    if record is None:
-        _fail(console, f"row {row_id} is not in {pointers}", code=1)
-
-    row_text = None
-    if memory.is_file():
-        row_text = next(
-            (row.text for row in load_memory_rows(memory) if row.row_id == row_id), None
-        )
-
-    if record.source_ref is None:
+    row = next((row for row in load_memory_rows(memory) if row.row_id == row_id), None)
+    if row is None:
         console.print(
-            f"[bold red]NOT_DERIVABLE[/bold red] {row_id} — "
-            f"{pointers} holds no source event for this row"
+            f"[bold yellow]ROW_TEXT_UNAVAILABLE[/bold yellow] {row_id} — "
+            f"{memory} has no row with this id, so there is no text to compare"
         )
-        raise typer.Exit(1)
+        raise typer.Exit(EXIT_NO_ROW_TEXT)
 
-    derivation = rederive(transcript.events, record.source_ref, row_text)
-    style = VERDICT_STYLE[derivation.verdict]
-    console.print(f"[{style}]{derivation.verdict.value}[/] {row_id}")
-    console.print(f"  pinned   {record.source_ref.describe()}")
-    console.print(f"  sha256   {record.source_ref.event_sha256}")
-    console.print(f"  reason   {derivation.reason}")
-    if derivation.event is not None:
-        console.print(f"  role     {derivation.event.role}  depth {derivation.event.parent_depth}")
-        console.print(f"  event    {derivation.event.text}")
-    if derivation.reproduced is not None:
-        console.print(f"  replay   {derivation.reproduced}")
-    raise typer.Exit(0 if derivation.ok else 1)
+    record = next((record for record in load_index(pointers) if record.row_id == row_id), None)
+    if record is None:
+        _fail(console, f"row {row_id} is not in {pointers}")
+
+    verdict = judge_row(transcript, row, record.source_ref, PIN_INDEX)
+    style = VERDICT_STYLE[verdict.verdict]
+    console.print(f"[{style}]{verdict.verdict.value}[/] {row_id}")
+    if record.source_ref is None:
+        console.print(f"  reason   {verdict.reason}")
+    else:
+        console.print(f"  pinned   {record.source_ref.describe()}")
+        console.print(f"  sha256   {record.source_ref.event_sha256}")
+        console.print(f"  reason   {verdict.reason}")
+        if verdict.event is not None:
+            console.print(f"  role     {verdict.event.role}  depth {verdict.event.parent_depth}")
+            console.print(f"  event    {verdict.event.text}")
+        if verdict.verdict.ok:
+            console.print(f"  replay   {verdict.text}")
+    raise typer.Exit(0 if verdict.verdict.ok else 1)
 
 
 @app.command("gate")

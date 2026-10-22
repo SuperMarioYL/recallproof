@@ -32,7 +32,6 @@ from typing import Any
 
 MEMORY_ROLES = frozenset({"user", "assistant"})
 TEXT_BLOCK = "text"
-EXCLUDED_BLOCK_TYPES = frozenset({"thinking", "tool_use", "tool_result"})
 
 
 class TranscriptError(Exception):

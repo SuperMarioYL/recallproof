@@ -238,7 +238,7 @@ def check_determinism(
         verdict = verdicts[row.row_id]
         expected = (
             Verdict.UNSUPPORTED_DERIVATION
-            if row.derivation == "abstractive"
+            if row.is_abstractive
             else (expectations or {}).get(row.row_id)
         )
         if expected is None:

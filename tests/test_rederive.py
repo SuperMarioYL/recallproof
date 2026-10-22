@@ -119,10 +119,56 @@ def test_wrong_uuid_fails(transcript, derived_ref):
     assert "is now" in derivation.reason
 
 
-def test_pointer_resolution_without_row_text(transcript, derived_ref):
-    """``rederive`` also answers "does this pointer still resolve?" on its own."""
-    _, source_ref = derived_ref
-    assert rederive(transcript.events, source_ref).verdict is Verdict.DERIVED
+def test_derived_requires_the_row_text_to_be_compared(transcript, derived_ref):
+    """``DERIVED`` is never returned without a byte-for-byte comparison.
+
+    ``rederive`` has no way to answer "does this pointer still resolve?" without
+    the row text, and a text that does not match the slice is not derived.
+    """
+    row, source_ref = derived_ref
+    with pytest.raises(TypeError):
+        rederive(transcript.events, source_ref)  # type: ignore[call-arg]
+    assert (
+        rederive(transcript.events, source_ref, f"{row.text} AND DELETE PROD.").verdict
+        is Verdict.NOT_DERIVABLE
+    )
+
+
+def test_abstractive_row_is_never_pinned_even_when_its_text_is_verbatim(tmp_path: Path):
+    """The index must not pin a row the verdict layer refuses to judge."""
+    session = tmp_path / "session.jsonl"
+    session.write_text(
+        json.dumps(
+            {
+                "parentUuid": None,
+                "type": "user",
+                "uuid": "aaaa1111-0000-4000-8000-0000000000a1",
+                "timestamp": "2026-10-19T09:00:00.000Z",
+                "sessionId": "aaaa1111-2222-4333-8444-555566667777",
+                "message": {"role": "user", "content": "Ship it."},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    memory = tmp_path / "rows.jsonl"
+    memory.write_text(
+        json.dumps(
+            {
+                "row_id": "abs_in_transcript",
+                "text": "Ship it.",
+                "derivation": "abstractive",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    transcript = load_transcript(session)
+    row = load_memory_rows(memory)[0]
+    assert transcript.locate(row.text) is not None  # the text is verbatim in the session
+    assert pin(transcript, row) is None
+    assert build_index(transcript, [row])[0].source_ref is None
+    assert challenge(transcript, [row])[0].verdict is Verdict.UNSUPPORTED_DERIVATION
 
 
 def test_abstractive_row_is_never_judged(tmp_path: Path):

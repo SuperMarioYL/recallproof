@@ -18,6 +18,14 @@ from .transcript import Transcript, TranscriptEvent
 
 SCHEMA_VERSION = 1
 
+# ``pinned_by`` values. ``MISSING`` is the honest state for a row an explicit
+# pointer index holds no pin for: the row was never resolved, so its verdict
+# cannot claim that no event reproduces its text.
+PIN_RESOLVED = "resolved"
+PIN_INDEX = "index"
+PIN_MISSING = "missing"
+PIN_NONE = "none"
+
 
 @dataclass(frozen=True, slots=True)
 class RowVerdict:
@@ -30,7 +38,7 @@ class RowVerdict:
     source_ref: SourceRef | None = None
     event: TranscriptEvent | None = None
     span: tuple[int, int] | None = None
-    pinned_by: str = "none"
+    pinned_by: str = PIN_NONE
     note: str = ""
 
     @property
@@ -88,13 +96,17 @@ def judge_row(
     source_ref: SourceRef | None,
     pinned_by: str,
 ) -> RowVerdict:
-    """Compute the verdict for a single row."""
-    if row.derivation == "abstractive":
+    """Compute the verdict for a single row.
+
+    This is the one place a row's verdict is decided, so ``challenge`` and
+    ``rederive`` cannot disagree about the same row.
+    """
+    if row.is_abstractive:
         return _from_derivation(
             row,
             unsupported("row is an abstraction, not a slice of any session event"),
             None,
-            "none",
+            PIN_NONE,
             note="abstractive row — not judged",
         )
 
@@ -113,8 +125,18 @@ def judge_row(
                 "the only matching evidence sits in an excluded block or record type"
             ),
             None,
-            "none",
+            PIN_NONE,
             note="evidence sits in an excluded block",
+        )
+
+    if pinned_by == PIN_MISSING:
+        return RowVerdict(
+            row_id=row.row_id,
+            text=row.text,
+            verdict=Verdict.NOT_DERIVABLE,
+            reason="the pointer index holds no pin for this row",
+            pinned_by=PIN_MISSING,
+            note="row is not in the pointer index — index it to challenge it",
         )
 
     return RowVerdict(
@@ -122,7 +144,7 @@ def judge_row(
         text=row.text,
         verdict=Verdict.NOT_DERIVABLE,
         reason="no session event reproduces this text",
-        pinned_by="none",
+        pinned_by=PIN_NONE,
         note="no event reproduces this text",
     )
 
@@ -137,17 +159,19 @@ def challenge(
     With ``index=None`` pointers are resolved from the transcript in memory,
     which is what a first run does. Pass a loaded pointer index to challenge
     against pins recorded earlier — a row edited after indexing then fails
-    re-derivation instead of silently matching a fresh slice.
+    re-derivation instead of silently matching a fresh slice, and a row the
+    index holds no pin for is reported as unpinned rather than as a counterfeit.
     """
     if index is None:
-        pinned = {record.row_id: (record.source_ref, "resolved") for record in build_index(transcript, rows)}
-    else:
         pinned = {
-            record.row_id: (record.source_ref, "index") for record in index
+            record.row_id: (record.source_ref, PIN_RESOLVED)
+            for record in build_index(transcript, rows)
         }
+    else:
+        pinned = {record.row_id: (record.source_ref, PIN_INDEX) for record in index}
     verdicts: list[RowVerdict] = []
     for row in rows:
-        source_ref, pinned_by = pinned.get(row.row_id, (None, "none"))
+        source_ref, pinned_by = pinned.get(row.row_id, (None, PIN_MISSING))
         verdicts.append(judge_row(transcript, row, source_ref, pinned_by))
     return verdicts
 

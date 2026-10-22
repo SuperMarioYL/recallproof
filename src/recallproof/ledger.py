@@ -62,6 +62,11 @@ class MemoryRow(BaseModel):
     derivation: DerivationClass = "extractive"
     source_ref: SourceRef | None = None
 
+    @property
+    def is_abstractive(self) -> bool:
+        """Whether the row is an AI-compressed abstraction rather than a slice."""
+        return self.derivation == "abstractive"
+
 
 class PointerRecord(BaseModel):
     """One line of the sidecar pointer index."""
@@ -129,7 +134,13 @@ def pin(transcript: Transcript, row: MemoryRow) -> SourceRef | None:
     Resolution is deliberately narrow: the row text must appear verbatim inside
     a single selected ``text`` block of a ``user`` / ``assistant`` record. If it
     does not, the row is not extractively derivable, and no pointer is invented.
+
+    An abstractive row is never pinned even when its text happens to be verbatim
+    in the transcript: the verdict layer refuses to judge it, so a pointer for it
+    would be a pin nothing ever re-derives.
     """
+    if row.is_abstractive:
+        return None
     found = transcript.span_of(row.text)
     if found is None:
         return None
@@ -146,5 +157,5 @@ def pin(transcript: Transcript, row: MemoryRow) -> SourceRef | None:
 
 
 def build_index(transcript: Transcript, rows: Iterable[MemoryRow]) -> list[PointerRecord]:
-    """Pin every row; unresolved rows are recorded with ``source_ref`` null."""
+    """Pin every row; unresolved and abstractive rows are recorded with ``source_ref`` null."""
     return [PointerRecord(row_id=row.row_id, source_ref=pin(transcript, row)) for row in rows]

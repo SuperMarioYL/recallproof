@@ -1,0 +1,56 @@
+{
+  "product": "RecallProof",
+  "version": "0.1.0",
+  "recorded_at": "2026-10-23",
+  "python": "3.12.13",
+  "environment": "macOS arm64, clean venv, package installed with pip install -e .",
+  "inputs": {
+    "session": "examples/session.jsonl",
+    "memory": "examples/memory_rows.jsonl",
+    "pointers": "examples/pointers.jsonl",
+    "note": "Both inputs are synthetic fixtures shaped exactly like a real Claude Code session JSONL. No real transcript is shipped."
+  },
+  "steps": [
+    {
+      "command": "recallproof challenge --session examples/session.jsonl --memory examples/memory_rows.jsonl",
+      "exit_code": 1,
+      "output": "recallproof challenge                                                                           \n┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ row      ┃ verdict                ┃ pinned event · span      ┃ what happened                 ┃\n┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩\n│ row_0001 │ DERIVED                │ 7c4a1e02 L2/B1 · 109:202 │ span reproduces the row text  │\n│ row_0002 │ NOT_DERIVABLE          │ -                        │ no event reproduces this text │\n│ row_0003 │ UNSUPPORTED_DERIVATION │ -                        │ abstractive row — not judged  │\n└──────────┴────────────────────────┴──────────────────────────┴───────────────────────────────┘\n3 rows challenged — DERIVED 1, NOT_DERIVABLE 1, UNSUPPORTED_DERIVATION 1"
+    },
+    {
+      "command": "recallproof index --session examples/session.jsonl --memory examples/memory_rows.jsonl",
+      "exit_code": 0,
+      "output": "3 rows indexed — 1 pinned, 2 unpinned → /tmp/rec/pointers.jsonl"
+    },
+    {
+      "command": "recallproof rederive row_0001",
+      "exit_code": 0,
+      "output": "DERIVED row_0001\n  pinned   line 2 block 1 chars 109:202 uuid 7c4a1e02\n  sha256   981858fbc1d114dbef050300738ce0df6c8e79ee5d65ee206646b38d873244b5\n  reason   line 2 block 1 chars 109:202 reproduce the row text\n  role     assistant  depth 1\n  event    Decision recorded: the job queue moves to Postgres. One transaction covers enqueue and \nthe row it schedules, which removes the Redis/Postgres dual-write failure mode behind the 03:40 \nduplicate shipments.\n  replay   which removes the Redis/Postgres dual-write failure mode behind the 03:40 duplicate \nshipments"
+    },
+    {
+      "command": "recallproof rederive row_0002",
+      "exit_code": 1,
+      "output": "NOT_DERIVABLE row_0002 — examples/pointers.jsonl holds no source event for this row"
+    },
+    {
+      "command": "recallproof challenge --session examples/session.jsonl --memory examples/memory_rows.jsonl --json",
+      "exit_code": 1,
+      "output": "{\n  \"schema_version\": 1,\n  \"session\": \"examples/session.jsonl\",\n  \"memory\": \"examples/memory_rows.jsonl\",\n  \"counts\": {\n    \"DERIVED\": 1,\n    \"NOT_DERIVABLE\": 1,\n    \"UNSUPPORTED_DERIVATION\": 1\n  },\n  \"rows\": [\n    {\n      \"row_id\": \"row_0001\",\n      \"verdict\": \"DERIVED\",\n      \"reason\": \"line 2 block 1 chars 109:202 reproduce the row text\",\n      \"note\": \"span reproduces the row text\",\n      \"pinned_by\": \"resolved\",\n      \"source_ref\": {\n        \"session_id\": \"3f6c1d90-8a24-4f77-9c3e-5b1d7e0a4c21\",\n        \"source_uuid\": \"7c4a1e02-0006-4b06-9a06-1a2b3c4d5e06\",\n        \"line_index\": 2,\n        \"parent_depth\": 1,\n        \"event_sha256\": \"981858fbc1d114dbef050300738ce0df6c8e79ee5d65ee206646b38d873244b5\",\n        \"block_index\": 1,\n        \"span\": [\n          109,\n          202\n        ],\n        \"derivation\": \"extractive\"\n      },\n      \"source_event\": {\n        \"uuid\": \"7c4a1e02-0006-4b06-9a06-1a2b3c4d5e06\",\n        \"role\": \"assistant\",\n        \"line_index\": 2,\n        \"block_index\": 1,\n        \"parent_depth\": 1,\n        \"sha256\": \"981858fbc1d114dbef050300738ce0df6c8e79ee5d65ee206646b38d873244b5\",\n        \"text\": \"Decision recorded: the job queue moves to Postgres. One transaction covers enqueue and the row it schedules, which removes the Redis/Postgres dual-write failure mode behind the 03:40 duplicate shipments.\"\n      },\n      \"span\": [\n        109,\n        202\n      ],\n      \"text\": \"which removes the Redis/Postgres dual-write failure mode behind the 03:40 duplicate shipments\"\n    },\n    {\n      \"row_id\": \"row_0002\",\n      \"verdict\": \"NOT_DERIVABLE\",\n      \"reason\": \"no session event reproduces this text\",\n      \"note\": \"no event reproduces this text\",\n      \"pinned_by\": \"none\",\n      \"source_ref\": null,\n      \"source_event\": null,\n      \"span\": null,\n      \"text\": \"We agreed to keep Redis as the job queue and move only the retry log to Postgres\"\n    },\n    {\n      \"row_id\": \"row_0003\",\n      \"verdict\": \"UNSUPPORTED_DERIVATION\",\n      \"reason\": \"row is an abstraction, not a slice of any session event\",\n      \"note\": \"abstractive row \\u2014 not judged\",\n      \"pinned_by\": \"none\",\n      \"source_ref\": null,\n      \"source_event\": null,\n      \"span\": null,\n      \"text\": \"Session summary: the team moved the job queue from Redis to Postgres and fixed a stale-token incident caused by clock skew\"\n    }\n  ]\n}"
+    },
+    {
+      "command": "python -m recallproof.spike --fixture",
+      "exit_code": 0,
+      "output": "recallproof gate  hand-built fixture — 1 extractive, 1 counterfeit, 1 abstractive row\n  PASS  re-derivation is byte-identical across 100/100 runs  (3/3 rows produced one digest each)\n  PASS  fixture_derived: extractive row → DERIVED  (DERIVED — b1f0c4d2 L2/B1 · 0:166)\n  PASS  fixture_counterfeit: extractive row → NOT_DERIVABLE  (NOT_DERIVABLE (no session event reproduces this text))\n  PASS  fixture_abstractive: abstractive row → UNSUPPORTED_DERIVATION  (UNSUPPORTED_DERIVATION (row is an abstraction, not a slice of any \nsession event))\n  PASS  a pure re-derivation of the pinned pointer returns DERIVED  (line 2 block 1 chars 0:166 uuid b1f0c4d2)\n  PASS  a shortened span fails instead of matching loosely  (span 0:165)\n  PASS  a line that changed since it was pinned fails  (pinned sha256 no longer matches the line)\nPASS  7/7 checks"
+    }
+  ],
+  "verdicts": {
+    "DERIVED": 1,
+    "NOT_DERIVABLE": 1,
+    "UNSUPPORTED_DERIVATION": 1
+  },
+  "limitations": [
+    "Extractive, turn-level rows only. An AI-compressed row returns UNSUPPORTED_DERIVATION instead of a verdict.",
+    "Read-only over the session JSONL and the memory export; no memory store is opened or written.",
+    "One sha256 per pinned line. That is tamper-evidence for a pinned event, not an append-only log.",
+    "The m1 demand half (2+ users describing confabulated memory in their own words) is a research gate, not something the CLI can prove."
+  ]
+}

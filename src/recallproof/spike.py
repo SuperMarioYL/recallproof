@@ -27,7 +27,7 @@ from pathlib import Path
 from rich.console import Console
 
 from .challenge import RowVerdict, challenge
-from .ledger import MemoryRow, load_memory_rows, pin
+from .ledger import load_memory_rows, pin
 from .rederive import Verdict, rederive
 from .transcript import load_transcript
 

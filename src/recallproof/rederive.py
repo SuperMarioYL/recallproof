@@ -22,9 +22,9 @@ The verdict is one of three honest states:
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
-from typing import Sequence
 
 from .ledger import SourceRef
 from .transcript import TranscriptEvent

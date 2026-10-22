@@ -8,9 +8,9 @@ judge and no memory store in the probe can produce that verdict today.
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Sequence
 
 from .ledger import MemoryRow, PointerRecord, SourceRef, build_index
 from .rederive import Derivation, Verdict, rederive, unsupported

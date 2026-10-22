@@ -9,7 +9,6 @@ from __future__ import annotations
 import json
 import tempfile
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -75,7 +74,7 @@ def _fail(console: Console, message: str, code: int = 2) -> None:
 
 
 def _load_inputs(
-    console: Console, session: Path, memory: Path, pointers: Optional[Path]
+    console: Console, session: Path, memory: Path, pointers: Path | None
 ):
     for label, path in (("session", session), ("memory", memory)):
         if not path.is_file():
@@ -122,7 +121,7 @@ def render_table(console: Console, verdicts: list[RowVerdict]) -> None:
 def challenge_cmd(
     session: Path = typer.Option(DEFAULT_SESSION, "--session", "-s", help="Claude Code session JSONL."),
     memory: Path = typer.Option(DEFAULT_MEMORY, "--memory", "-m", help="Memory rows as JSONL."),
-    pointers: Optional[Path] = typer.Option(
+    pointers: Path | None = typer.Option(
         None,
         "--pointers",
         "-p",
@@ -214,8 +213,8 @@ def rederive_cmd(
 
 @app.command("gate")
 def gate(
-    session: Optional[Path] = typer.Option(None, "--session", "-s", help="Gate a real session JSONL."),
-    memory: Optional[Path] = typer.Option(None, "--memory", "-m", help="Memory rows for --session."),
+    session: Path | None = typer.Option(None, "--session", "-s", help="Gate a real session JSONL."),
+    memory: Path | None = typer.Option(None, "--memory", "-m", help="Memory rows for --session."),
     runs: int = typer.Option(100, "--runs", help="Repetitions for the determinism check."),
 ) -> None:
     """Prove re-derivation is byte-deterministic, on the fixture or on your own files."""
@@ -249,4 +248,4 @@ def main() -> None:
         raise SystemExit(2)
 
 
-__all__ = ["app", "main", "render_table", "challenge_cmd", "index_cmd", "rederive_cmd", "gate"]
+__all__ = ["app", "challenge_cmd", "gate", "index_cmd", "main", "rederive_cmd", "render_table"]

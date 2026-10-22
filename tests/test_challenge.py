@@ -20,7 +20,8 @@ from recallproof import (
     write_index,
 )
 from recallproof.cli import app
-from recallproof.transcript import TranscriptError, load_transcript as load
+from recallproof.transcript import TranscriptError
+from recallproof.transcript import load_transcript as load
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SESSION = REPO_ROOT / "examples" / "session.jsonl"

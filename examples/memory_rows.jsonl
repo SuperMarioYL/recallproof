@@ -1,0 +1,3 @@
+{"row_id": "row_0001", "text": "which removes the Redis/Postgres dual-write failure mode behind the 03:40 duplicate shipments", "derivation": "extractive"}
+{"row_id": "row_0002", "text": "We agreed to keep Redis as the job queue and move only the retry log to Postgres", "derivation": "extractive"}
+{"row_id": "row_0003", "text": "Session summary: the team moved the job queue from Redis to Postgres and fixed a stale-token incident caused by clock skew", "derivation": "abstractive"}

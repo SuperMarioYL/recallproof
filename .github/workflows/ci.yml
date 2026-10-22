@@ -28,5 +28,5 @@ jobs:
           # challenge exits 1 on the sample session: one row cannot be re-derived.
           recallproof challenge --session examples/session.jsonl --memory examples/memory_rows.jsonl || test $? -eq 1
           recallproof index --session examples/session.jsonl --memory examples/memory_rows.jsonl --out /tmp/pointers.jsonl
-          recallproof rederive row_0001 --session examples/session.jsonl --pointers /tmp/pointers.jsonl
+          recallproof rederive row_0001 --session examples/session.jsonl --memory examples/memory_rows.jsonl --pointers /tmp/pointers.jsonl
           python -m recallproof.spike --fixture

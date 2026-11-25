@@ -31,6 +31,15 @@ POINTERS = REPO_ROOT / "examples" / "pointers.jsonl"
 runner = CliRunner()
 
 
+def _flat(text: str) -> str:
+    """One line, so an assertion does not depend on the terminal width.
+
+    rich wraps a long error or check line at the console width; the sentence is
+    still there, just split across lines.
+    """
+    return " ".join(text.split())
+
+
 @pytest.fixture(scope="module")
 def verdicts():
     return challenge(load_transcript(SESSION), load_memory_rows(MEMORY))
@@ -281,7 +290,7 @@ def test_cli_challenge_refuses_a_row_file_with_no_rows(tmp_path: Path):
     )
 
     assert result.exit_code == 2
-    assert "holds no memory rows" in result.stdout
+    assert "holds no memory rows" in _flat(result.stdout)
     assert '"counts"' not in result.stdout
 
 
@@ -297,7 +306,7 @@ def test_cli_index_refuses_a_row_file_with_no_rows(tmp_path: Path):
     )
 
     assert result.exit_code == 2
-    assert "holds no memory rows" in result.stdout
+    assert "holds no memory rows" in _flat(result.stdout)
     assert out.read_text(encoding="utf-8") == "previous index\n"
 
 
@@ -340,5 +349,5 @@ def test_cli_gate_fails_cleanly_on_a_row_file_with_no_rows(tmp_path: Path):
     )
 
     assert result.exit_code == 1
-    assert "the row file holds no rows" in result.stdout
+    assert "the row file holds no rows" in _flat(result.stdout)
     assert "Traceback" not in result.stdout

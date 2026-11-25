@@ -269,3 +269,76 @@ def test_transcript_rejects_broken_json(tmp_path: Path):
     broken.write_text('{"type": "user", "message":\n', encoding="utf-8")
     with pytest.raises(TranscriptError):
         load(broken)
+
+
+def test_cli_challenge_refuses_a_row_file_with_no_rows(tmp_path: Path):
+    """No rows is the absence of a challenge, not a clean pass for CI."""
+    empty = tmp_path / "empty.jsonl"
+    empty.write_text("", encoding="utf-8")
+
+    result = runner.invoke(
+        app, ["challenge", "-s", str(SESSION), "-m", str(empty), "--json"]
+    )
+
+    assert result.exit_code == 2
+    assert "holds no memory rows" in result.stdout
+    assert '"counts"' not in result.stdout
+
+
+def test_cli_index_refuses_a_row_file_with_no_rows(tmp_path: Path):
+    """Writing an empty index must not truncate a previous good one."""
+    empty = tmp_path / "empty.jsonl"
+    empty.write_text("", encoding="utf-8")
+    out = tmp_path / "pointers.jsonl"
+    out.write_text("previous index\n", encoding="utf-8")
+
+    result = runner.invoke(
+        app, ["index", "-s", str(SESSION), "-m", str(empty), "-o", str(out)]
+    )
+
+    assert result.exit_code == 2
+    assert "holds no memory rows" in result.stdout
+    assert out.read_text(encoding="utf-8") == "previous index\n"
+
+
+def test_cli_challenge_still_exits_one_on_the_shipped_rows():
+    result = runner.invoke(app, ["challenge", "-s", str(SESSION), "-m", str(MEMORY)])
+
+    assert result.exit_code == 1
+    assert "3 rows challenged" in result.stdout
+
+
+def test_cli_gate_passes_when_the_first_row_is_abstractive(tmp_path: Path):
+    """A store export that lists an abstractive row first is not a gate failure."""
+    rows = tmp_path / "rows.jsonl"
+    abstractive = {
+        "row_id": "aaa_abstractive",
+        "text": "Session summary: nothing here was said verbatim",
+        "derivation": "abstractive",
+    }
+    extractive = load_memory_rows(MEMORY)[0].model_dump()
+    rows.write_text(
+        "\n".join(json.dumps(row) for row in (abstractive, extractive)) + "\n",
+        encoding="utf-8",
+    )
+
+    result = runner.invoke(
+        app, ["gate", "-s", str(SESSION), "-m", str(rows), "--runs", "2"]
+    )
+
+    assert result.exit_code == 0
+    assert "6/6 checks" in result.stdout
+    assert "FAIL" not in result.stdout
+
+
+def test_cli_gate_fails_cleanly_on_a_row_file_with_no_rows(tmp_path: Path):
+    empty = tmp_path / "empty.jsonl"
+    empty.write_text("", encoding="utf-8")
+
+    result = runner.invoke(
+        app, ["gate", "-s", str(SESSION), "-m", str(empty), "--runs", "2"]
+    )
+
+    assert result.exit_code == 1
+    assert "the row file holds no rows" in result.stdout
+    assert "Traceback" not in result.stdout

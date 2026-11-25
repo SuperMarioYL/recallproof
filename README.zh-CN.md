@@ -210,7 +210,7 @@ $ echo $?
 
 ### `recallproof challenge`
 
-对每一行给出判定。全部行都重导出成功时退出 `0`；任意一行不成功时退出 `1`——包括 `UNSUPPORTED_DERIVATION`，因为「查不了」不等于「通过了」。
+对每一行给出判定。全部行都重导出成功时退出 `0`；任意一行不成功时退出 `1`——包括 `UNSUPPORTED_DERIVATION`，因为「查不了」不等于「通过了」。行文件里一行都没有时退出 `2`：什么都没被质询，就没有「通过」可报。
 
 | 参数 | 默认值 | 含义 |
 | --- | --- | --- |
@@ -258,7 +258,7 @@ $ recallproof index --session examples/session.jsonl --memory examples/memory_ro
 3 rows indexed — 1 pinned, 2 unpinned → examples/pointers.jsonl
 ```
 
-写出旁路指针索引：每行一条记录，`{"row_id": ..., "source_ref": {...}}`，钉不住的行 `source_ref` 为 `null`——包括所有 `abstractive` 行，它们永远不会被钉。它不做原地标注，也不打开任何记忆存储——claude-mem 和 mem0 都是 SQLite，本来就没有一个「记忆文件」可以复制出来写。
+写出旁路指针索引：每行一条记录，`{"row_id": ..., "source_ref": {...}}`，钉不住的行 `source_ref` 为 `null`——包括所有 `abstractive` 行，它们永远不会被钉。它不做原地标注，也不打开任何记忆存储——claude-mem 和 mem0 都是 SQLite，本来就没有一个「记忆文件」可以复制出来写。行文件里一行都没有时退出 `2`，不会把索引改写成空文件。
 
 ### `recallproof rederive <row_id>`
 
@@ -294,7 +294,7 @@ b1f0c4d2)
 PASS  7/7 checks
 ```
 
-`python -m recallproof.spike --fixture` 跑的是同一件事；`recallproof gate --session <file> --memory <rows>` 可以把闸门指向你自己的文件。m1 的另一半——在 120 天内找到两个用户用自己的话描述被编造的记忆——是一个研究问题，不是 CLI 能证明的东西。它在下面的路线图里如实记录，而不是在这里宣称已经完成。
+`python -m recallproof.spike --fixture` 跑的是同一件事；`recallproof gate --session <file> --memory <rows>` 可以把闸门指向你自己的文件。指向你自己的行时，它探的是它真正钉得住的第一行，所以导出里排在最前的是抽象行也不算失败；行文件里一行都没有时会给出一个失败项并退出 `1`，而不是抛异常。m1 的另一半——在 120 天内找到两个用户用自己的话描述被编造的记忆——是一个研究问题，不是 CLI 能证明的东西。它在下面的路线图里如实记录，而不是在这里宣称已经完成。
 
 ## 能力边界
 
@@ -330,7 +330,7 @@ PASS  7/7 checks
 | 顺序 | 文件行序加 `parentUuid` 链。不编造序号。 |
 | 多处匹配 | 取文件顺序上的第一处匹配，重导出重放的就是这一处。跨两个块的行不会被钉——没有任何单个块包含它。 |
 | 抽象行 | 永远不钉，即使它的文本碰巧在 transcript 里逐字出现。判定层拒绝裁判的行，索引里也不会留下它的指针。 |
-| 行尾符 | 被钉住的 sha256 算的是不含行尾换行的那一行 JSONL，所以同一个文件在任何平台都能重导出。 |
+| 行尾符与分隔符 | 一行 JSONL 只在 `"\n"` 处结束（行尾的 `\r` 会被去掉），被钉住的 sha256 算的就是这一行，所以同一个文件在任何平台都能重导出。JSON 字符串里的 U+2028 或 U+0085 留在它所在的行里，不会把记录切开。 |
 | 它不会做的事 | 写入记忆存储、调用模型、退回相似度、给出一个它算不出来的判定。 |
 
 ## 路线图
@@ -341,7 +341,9 @@ v0.1.0 交付了计划中的三个里程碑，且全部可用：
 - **m2 —— 挂载指针并重导出。** `recallproof index` 写出旁路指针索引，`recallproof rederive <row_id>` 重放单行或退出非零码。
 - **m3 —— 质询与演示。** `recallproof challenge` 打印判定表，`--json` 供 CI 使用，`assets/demo.svg` 就是从那次运行录下来的。
 
-v0.1 不做的事（列出来是为了把边界写清楚）：终端表格之外的 Web UI 或 TUI；任何 LLM 裁判或 embedding 相似度兜底；对抽象行打分而不是拒答；写入 claude-mem、mem0 或 MemPalace；托管式或防篡改的取证日志；跨 harness 的可移植记忆格式；MCP server 或各 harness 插件；超出「每个被钉事件一个 sha256」的防篡改能力。
+v0.2.0 是一个修 bug 的版本，不是路线图上的一步。它关闭了 [#1](https://github.com/SuperMarioYL/recallproof/issues/1)：JSON 字符串里带 U+2028、U+2029 或 U+0085 的 transcript 不再被切成两半，`line_index` 也仍然按文件的真实行计数。它同时让 `challenge` 和 `index` 在行文件里一行都没有时退出 `2`，而不是报一个干净通过；并让 `gate` 探它真正钉得住的第一行。上面三个里程碑和下面的边界都没有变化。
+
+v0.1 与 v0.2 都不做的事（列出来是为了把边界写清楚）：终端表格之外的 Web UI 或 TUI；任何 LLM 裁判或 embedding 相似度兜底；对抽象行打分而不是拒答；写入 claude-mem、mem0 或 MemPalace；托管式或防篡改的取证日志；跨 harness 的可移植记忆格式；MCP server 或各 harness 插件；超出「每个被钉事件一个 sha256」的防篡改能力。
 
 接下来，大致按顺序：一个只读适配器，直接接受 claude-mem 或 mem0 的导出，这样 `index` 不必依赖手写的行文件；以及给闸门加上 `--json` 输出，让 CI 任务能记录确定性检查的结果，而不只是通过或失败。
 
@@ -349,7 +351,7 @@ v0.1 不做的事（列出来是为了把边界写清楚）：终端表格之外
 
 ```bash
 uv venv && uv pip install -e ".[dev]"
-python -m pytest                       # 33 个测试
+python -m pytest                       # 49 个测试
 python scripts/record_demo_svg.py      # 从真实运行重新录制 assets/demo.svg
 python scripts/build_figures.py        # 重新生成四组配图（明/暗）
 ```

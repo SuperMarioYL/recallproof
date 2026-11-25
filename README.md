@@ -210,7 +210,7 @@ $ echo $?
 
 ### `recallproof challenge`
 
-Verdicts for every row. Exits `0` when every row re-derived and `1` when any row did not — including `UNSUPPORTED_DERIVATION`, because a row that cannot be checked is not a row that passed.
+Verdicts for every row. Exits `0` when every row re-derived and `1` when any row did not — including `UNSUPPORTED_DERIVATION`, because a row that cannot be checked is not a row that passed. A row file that holds no rows exits `2`: nothing was challenged, so there is no pass to report.
 
 | Flag | Default | Meaning |
 | --- | --- | --- |
@@ -258,7 +258,7 @@ $ recallproof index --session examples/session.jsonl --memory examples/memory_ro
 3 rows indexed — 1 pinned, 2 unpinned → examples/pointers.jsonl
 ```
 
-Writes the sidecar pointer index: one record per row, `{"row_id": ..., "source_ref": {...}}`, with `source_ref: null` for a row that could not be pinned — including every `abstractive` row, which is never pinned. Nothing is annotated in place and no memory store is opened — claude-mem and mem0 are SQLite, so there is no memory file to copy and write onto.
+Writes the sidecar pointer index: one record per row, `{"row_id": ..., "source_ref": {...}}`, with `source_ref: null` for a row that could not be pinned — including every `abstractive` row, which is never pinned. Nothing is annotated in place and no memory store is opened — claude-mem and mem0 are SQLite, so there is no memory file to copy and write onto. A row file that holds no rows exits `2` rather than rewriting the index with nothing.
 
 ### `recallproof rederive <row_id>`
 
@@ -294,7 +294,7 @@ b1f0c4d2)
 PASS  7/7 checks
 ```
 
-`python -m recallproof.spike --fixture` is the same run, and `recallproof gate --session <file> --memory <rows>` points it at your own files. The other half of the m1 gate — two users in 120 days describing confabulated memory in their own words — is a research question, not something a CLI can prove. It is tracked in the roadmap rather than asserted here.
+`python -m recallproof.spike --fixture` is the same run, and `recallproof gate --session <file> --memory <rows>` points it at your own files. On your own rows it probes the first row it can actually pin, so an export that lists an abstractive row first is not a failure; a row file with no rows fails the check and exits `1` instead of raising. The other half of the m1 gate — two users in 120 days describing confabulated memory in their own words — is a research question, not something a CLI can prove. It is tracked in the roadmap rather than asserted here.
 
 ## Capabilities
 
@@ -330,7 +330,7 @@ There is nothing to configure. No config file, no environment variables, no netw
 | Ordering | File line order plus the `parentUuid` chain. No invented sequence numbers. |
 | Duplicate matches | The first match in file order wins, and that is the event re-derivation replays. A row that spans two blocks is not pinned at all, because no single block contains it. |
 | Abstractive rows | Never pinned, even when the text happens to appear verbatim in the transcript. The index does not carry a pointer for a row the verdict layer refuses to judge. |
-| Line endings | The pinned sha256 is over the JSONL line without its trailing newline, so the same file re-derives on any platform. |
+| Line endings and separators | A JSONL line ends at `"\n"` (a trailing `\r` is dropped), and the pinned sha256 covers that line, so the same file re-derives on any platform. A U+2028 or U+0085 inside a JSON string stays inside its line instead of splitting the record. |
 | What it will not do | Write to a memory store, call a model, fall back to similarity, or invent a verdict it cannot compute. |
 
 ## Roadmap
@@ -341,7 +341,9 @@ v0.1.0 ships the three milestones from the plan, all of them working:
 - **m2 — attach pointers and re-derive.** `recallproof index` writes the sidecar pointer index, and `recallproof rederive <row_id>` replays one row or exits non-zero.
 - **m3 — challenge and demo.** `recallproof challenge` prints the verdict table, `--json` for CI, and `assets/demo.svg` is recorded from that run.
 
-Not planned for v0.1, listed so the boundary is explicit: a web UI or TUI beyond the terminal table; any LLM-judge or embedding-similarity fallback; abstractive rows scored rather than refused; writing into claude-mem, mem0 or MemPalace; a hosted or tamper-evident attestation log; a portable cross-harness memory format; an MCP server or per-harness plugins; tamper-evidence beyond one sha256 per pinned event.
+v0.2.0 is a bug-fix release, not a roadmap step. It closes [#1](https://github.com/SuperMarioYL/recallproof/issues/1): a transcript whose JSON string carries U+2028, U+2029 or U+0085 is no longer cut in half, and `line_index` still counts the file's real lines. It also makes `challenge` and `index` exit `2` on a row file with no rows instead of reporting a clean pass, and makes `gate` probe the first row it can pin. The three milestones above and the boundaries below are unchanged.
+
+Not planned for v0.1 or v0.2, listed so the boundary is explicit: a web UI or TUI beyond the terminal table; any LLM-judge or embedding-similarity fallback; abstractive rows scored rather than refused; writing into claude-mem, mem0 or MemPalace; a hosted or tamper-evident attestation log; a portable cross-harness memory format; an MCP server or per-harness plugins; tamper-evidence beyond one sha256 per pinned event.
 
 Next, in rough order: a read-only adapter that accepts a claude-mem or mem0 export directly, so `index` does not need a hand-written row file; and `--json` output for the gate, so a CI job can record the determinism check rather than only pass or fail it.
 
@@ -349,7 +351,7 @@ Next, in rough order: a read-only adapter that accepts a claude-mem or mem0 expo
 
 ```bash
 uv venv && uv pip install -e ".[dev]"
-python -m pytest                       # 33 tests
+python -m pytest                       # 49 tests
 python scripts/record_demo_svg.py      # re-record assets/demo.svg from a real run
 python scripts/build_figures.py        # regenerate the four figure pairs
 ```

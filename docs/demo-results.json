@@ -1,7 +1,7 @@
 {
   "product": "RecallProof",
-  "version": "0.1.0",
-  "recorded_at": "2026-10-23",
+  "version": "0.2.0",
+  "recorded_at": "2026-11-26",
   "python": "3.12.13",
   "environment": "macOS arm64, clean venv, package installed with pip install -e ., COLUMNS=100",
   "inputs": {

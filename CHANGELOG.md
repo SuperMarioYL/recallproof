@@ -4,6 +4,40 @@ All notable changes to this project are documented in this file. The format
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-11-26
+
+A bug-fix release. The reader no longer breaks on a legal JSON string that
+carries an unusual line separator, and the commands that gate a CI job now
+refuse a row file with nothing in it instead of reporting success.
+
+### Added
+
+- `tests/test_version_lockstep.py` — `VERSION`, `pyproject.toml`,
+  `recallproof.__version__` (what `--version` prints) and the recorded
+  `docs/demo-results.json` must all agree, so a release cannot drift from the
+  CLI or from the demo artifact.
+
+### Fixed
+
+- Both JSONL readers split a file on `"\n"` only (#1). `str.splitlines()` also
+  splits on U+2028, U+2029 and U+0085, which JSON allows unescaped inside string
+  values, so a message carrying one was cut in half: the fragment failed to
+  parse and the whole load raised `TranscriptError "invalid JSON"`, and when the
+  split landed cleanly every later `line_index` was shifted and pinned pointers
+  stopped matching. `transcript.py` and `ledger.py` now share one line split (a
+  trailing `\r` is still dropped), so `line_index` counts the file's real lines.
+- `challenge` and `index` refuse a row file that holds no rows and exit `2`. An
+  empty or wrongly exported row file used to print an all-zero JSON document and
+  exit `0`, so the documented CI gate passed without challenging anything;
+  `index` would also overwrite the pointer file with no records.
+- `gate` probes the first row it can actually pin instead of `rows[0]`, so an
+  export that lists an abstractive or unpinnable row first no longer fails the
+  gate with "no pointer resolved". A row file with no rows now produces a failed
+  check and exit `1` instead of an `IndexError`, and the byte-identical check no
+  longer passes when zero rows were re-derived.
+
+[0.2.0]: https://github.com/SuperMarioYL/recallproof/releases/tag/v0.2.0
+
 ## [0.1.0] - 2026-10-23
 
 The first release. Extractive, turn-level memory rows only.

@@ -114,6 +114,19 @@ def _line_digest(raw: str) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def split_jsonl_lines(text: str) -> list[str]:
+    """Split a JSONL document on ``"\\n"`` only, dropping one trailing ``"\\r"``.
+
+    ``str.splitlines`` also splits on U+2028, U+2029 and U+0085, which JSON
+    permits unescaped inside string values. Splitting on those cuts a record in
+    half, so the fragment fails to parse and every later line number is wrong.
+    Splitting on the newline alone keeps one element per real file line, which is
+    what ``line_index`` points at. A trailing empty element from the final
+    newline is harmless: callers skip blank lines.
+    """
+    return [line.removesuffix("\r") for line in text.split("\n")]
+
+
 def _text_blocks(role: str, content: Any) -> Iterator[tuple[int, str]]:
     """Yield ``(block_index, text)`` for every selectable ``text`` block."""
     if isinstance(content, str):
@@ -204,7 +217,7 @@ def load_transcript(path: str | Path) -> Transcript:
     """Read a Claude Code session JSONL into a :class:`Transcript`."""
     path = Path(path)
     try:
-        raw_lines = path.read_text(encoding="utf-8").splitlines()
+        raw_lines = split_jsonl_lines(path.read_text(encoding="utf-8"))
     except OSError as exc:
         raise TranscriptError(f"cannot read transcript {path}: {exc}") from exc
 

@@ -27,7 +27,7 @@ from pathlib import Path
 from rich.console import Console
 
 from .challenge import RowVerdict, challenge
-from .ledger import load_memory_rows, pin
+from .ledger import MemoryRow, SourceRef, load_memory_rows, pin
 from .rederive import Verdict, rederive
 from .transcript import load_transcript
 
@@ -229,7 +229,7 @@ def check_determinism(
     checks.append(
         Check(
             name=f"re-derivation is byte-identical across {runs}/{runs} runs",
-            passed=len(stable) == len(seen) and len(seen) == len(rows),
+            passed=bool(rows) and len(stable) == len(seen) and len(seen) == len(rows),
             detail=f"{len(stable)}/{len(rows)} rows produced one digest each",
         )
     )
@@ -277,10 +277,26 @@ def check_purity(session: Path, memory: Path) -> list[Check]:
     """A wrong span and a changed line must both fail, not be forgiven."""
     transcript = load_transcript(session)
     rows = load_memory_rows(memory)
-    extractive = rows[0]
-    source_ref = pin(transcript, extractive)
-    if source_ref is None:
-        return [Check("pin an extractive row", False, "no pointer resolved")]
+    if not rows:
+        return [Check("pin an extractive row", False, "the row file holds no rows")]
+
+    # Probe the first row that can actually be pinned, not rows[0]: a store export
+    # that lists an abstractive or unpinnable row first must not fail the gate.
+    pinned: tuple[MemoryRow, SourceRef] | None = None
+    for row in rows:
+        source_ref = pin(transcript, row)
+        if source_ref is not None:
+            pinned = (row, source_ref)
+            break
+    if pinned is None:
+        return [
+            Check(
+                "pin an extractive row",
+                False,
+                "no row is an extractive slice of this session",
+            )
+        ]
+    extractive, source_ref = pinned
 
     checks = [
         Check(

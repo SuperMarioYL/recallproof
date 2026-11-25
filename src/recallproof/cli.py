@@ -26,6 +26,7 @@ from .challenge import (
 )
 from .ledger import (
     LedgerError,
+    MemoryRow,
     build_index,
     load_index,
     load_memory_rows,
@@ -80,6 +81,19 @@ def _fail(console: Console, message: str, code: int = 2) -> NoReturn:
     raise typer.Exit(code)
 
 
+def _load_rows(console: Console, memory: Path) -> list[MemoryRow]:
+    """Load memory rows, refusing a file that holds none.
+
+    A row file with no rows cannot support a verdict: exiting 0 from ``challenge``
+    would read as a clean pass, and ``index`` would overwrite the pointer file
+    with nothing. Both are the absence of a run, not a result.
+    """
+    rows = load_memory_rows(memory)
+    if not rows:
+        _fail(console, f"{memory} holds no memory rows — nothing to read")
+    return rows
+
+
 def _load_inputs(
     console: Console, session: Path, memory: Path, pointers: Path | None
 ):
@@ -87,7 +101,7 @@ def _load_inputs(
         if not path.is_file():
             _fail(console, f"{label} file not found: {path}")
     transcript = load_transcript(session)
-    rows = load_memory_rows(memory)
+    rows = _load_rows(console, memory)
     index = None
     if pointers is not None:
         if not pointers.is_file():
@@ -138,7 +152,8 @@ def challenge_cmd(
 ) -> None:
     """Print a DERIVED / NOT DERIVABLE verdict for every memory row.
 
-    Exits 0 when every row re-derived, 1 when any row did not.
+    Exits 0 when every row re-derived, 1 when any row did not, and 2 when the row
+    file holds no rows to challenge.
     """
     console = Console()
     transcript, rows, index = _load_inputs(console, session, memory, pointers)
@@ -163,7 +178,7 @@ def index_cmd(
         if not path.is_file():
             _fail(console, f"{label} file not found: {path}")
     transcript = load_transcript(session)
-    rows = load_memory_rows(memory)
+    rows = _load_rows(console, memory)
     records = build_index(transcript, rows)
     written = write_index(out, records)
     pinned = sum(1 for record in records if record.source_ref is not None)

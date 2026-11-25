@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "recallproof"
-version = "0.1.0"
+version = "0.2.0"
 description = "Recall attestation for AI agent memory: replay every recalled row to its source session event."
 readme = "README.md"
 requires-python = ">=3.12"

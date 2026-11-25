@@ -20,7 +20,7 @@ from .ledger import (
 from .rederive import Derivation, Verdict, rederive
 from .transcript import Transcript, TranscriptError, TranscriptEvent, load_transcript
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "Derivation",

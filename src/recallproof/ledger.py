@@ -21,7 +21,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from .transcript import Transcript
+from .transcript import Transcript, split_jsonl_lines
 
 DerivationClass = Literal["extractive", "abstractive"]
 
@@ -80,7 +80,7 @@ class PointerRecord(BaseModel):
 def read_jsonl(path: str | Path) -> list[dict]:
     path = Path(path)
     try:
-        raw_lines = path.read_text(encoding="utf-8").splitlines()
+        raw_lines = split_jsonl_lines(path.read_text(encoding="utf-8"))
     except OSError as exc:
         raise LedgerError(f"cannot read {path}: {exc}") from exc
     rows: list[dict] = []

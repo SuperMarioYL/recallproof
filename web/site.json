@@ -58,8 +58,8 @@
         "en": "Three honest verdicts, and refusing is one of them"
       },
       "body": {
-        "zh": "DERIVED 表示这一行就是某个会话事件的字节级切片；NOT_DERIVABLE 表示它声称来自该会话，而没有任何事件能复现它；UNSUPPORTED_DERIVATION 表示它根本不是任何事件的切片（AI 压缩摘要、embedding、多事件合并），工具拒绝给它打分，而不是退回它本身否定的那套裁判逻辑。判定也是可查的：rederive <row_id> 打印源事件、字符区间与 sha256，退出码区分三种结果（0 / 1 / 2），challenge --json 给出一份 CI 可以直接卡住的文档。",
-        "en": "DERIVED means the row is a byte-level slice of a real session event; NOT_DERIVABLE means it claims to come from the session and no event reproduces it; UNSUPPORTED_DERIVATION means it is not a slice of any event at all (an AI-compressed summary, an embedding, a merge), so the tool refuses to score it instead of falling back to the judge logic it rejects. The verdict is inspectable too: rederive <row_id> prints the source event, the character span and the sha256, exit codes separate the three outcomes (0 / 1 / 2), and challenge --json emits a document a CI job can gate on."
+        "zh": "DERIVED 表示这一行就是某个会话事件的字节级切片；NOT_DERIVABLE 表示它声称来自该会话，而没有任何事件能复现它；UNSUPPORTED_DERIVATION 表示它根本不是任何事件的切片（AI 压缩摘要、embedding、多事件合并），工具拒绝给它打分，而不是退回它本身否定的那套裁判逻辑。判定也是可查的：rederive <row_id> 打印源事件、字符区间与 sha256，退出码区分三种结果（0 / 1 / 2），challenge --json 给出一份 CI 可以直接卡住的文档——行文件里一行都没有时它退出 2，而不是把「什么都没质询」报成通过。",
+        "en": "DERIVED means the row is a byte-level slice of a real session event; NOT_DERIVABLE means it claims to come from the session and no event reproduces it; UNSUPPORTED_DERIVATION means it is not a slice of any event at all (an AI-compressed summary, an embedding, a merge), so the tool refuses to score it instead of falling back to the judge logic it rejects. The verdict is inspectable too: rederive <row_id> prints the source event, the character span and the sha256, exit codes separate the three outcomes (0 / 1 / 2), and challenge --json emits a document a CI job can gate on — when the row file holds no rows it exits 2 instead of reporting an empty run as a pass."
       }
     }
   ],
@@ -69,8 +69,8 @@
       "en": "Verified run records"
     },
     "note": {
-      "zh": "以下四步的命令与输出逐字取自 docs/demo-results.json（2026-10-23，macOS arm64 干净 venv，Python 3.12.13，COLUMNS=100）；完整六步记录——包括 challenge 判定表与 --json 文档——就在那个文件里。两个输入都是合成的 fixture，形状与真实的 Claude Code 会话 JSONL 完全一致；仓库不附带任何真实 transcript。",
-      "en": "The commands and outputs of these four steps are copied verbatim from docs/demo-results.json (2026-10-23, clean venv on macOS arm64, Python 3.12.13, COLUMNS=100); the full six-step record — including the challenge verdict table and the --json document — lives in that file. Both inputs are synthetic fixtures shaped exactly like a real Claude Code session JSONL; no real transcript is shipped."
+      "zh": "以下四步的命令与输出逐字取自 docs/demo-results.json（2026-11-26，macOS arm64 干净 venv，Python 3.12.13，COLUMNS=100）；完整六步记录——包括 challenge 判定表与 --json 文档——就在那个文件里。两个输入都是合成的 fixture，形状与真实的 Claude Code 会话 JSONL 完全一致；仓库不附带任何真实 transcript。",
+      "en": "The commands and outputs of these four steps are copied verbatim from docs/demo-results.json (2026-11-26, clean venv on macOS arm64, Python 3.12.13, COLUMNS=100); the full six-step record — including the challenge verdict table and the --json document — lives in that file. Both inputs are synthetic fixtures shaped exactly like a real Claude Code session JSONL; no real transcript is shipped."
     },
     "source": "https://github.com/SuperMarioYL/recallproof/blob/main/docs/demo-results.json",
     "steps": [
@@ -208,8 +208,8 @@
       "en": "Only the text blocks of user and assistant records are indexed. thinking, tool_use and tool_result blocks and the other record types (attachment, system and similar) are excluded; a row whose only evidence sits there returns UNSUPPORTED_DERIVATION."
     },
     {
-      "zh": "v0.1 没有 MCP server、没有 Web UI 或 TUI、没有跨 harness 的可移植记忆格式，也不对抽象行打分。行文件目前需要你从自己的存储导出。",
-      "en": "v0.1 has no MCP server, no web UI or TUI, no portable cross-harness memory format, and does not score abstractive rows. The row file is currently something you export from your own store."
+      "zh": "v0.2 没有 MCP server、没有 Web UI 或 TUI、没有跨 harness 的可移植记忆格式，也不对抽象行打分。行文件目前需要你从自己的存储导出。",
+      "en": "v0.2 has no MCP server, no web UI or TUI, no portable cross-harness memory format, and does not score abstractive rows. The row file is currently something you export from your own store."
     }
   ],
   "scene": {
@@ -327,8 +327,8 @@
           "en": "What it will not do"
         },
         "body": {
-          "zh": "不写入任何记忆存储、不调用模型、不退回相似度匹配、不给出一个它算不出来的判定；也没有 MCP server、Web UI、托管式取证日志或跨 harness 的记忆格式。v0.1 把这些列在路线图里，而不是在这里宣称。",
-          "en": "It does not write to any memory store, call a model, fall back to similarity, or invent a verdict it cannot compute; there is also no MCP server, web UI, hosted attestation log or cross-harness memory format. v0.1 lists these on the roadmap rather than claiming them here."
+          "zh": "不写入任何记忆存储、不调用模型、不退回相似度匹配、不给出一个它算不出来的判定；也没有 MCP server、Web UI、托管式取证日志或跨 harness 的记忆格式。v0.2 把这些列在路线图里，而不是在这里宣称。",
+          "en": "It does not write to any memory store, call a model, fall back to similarity, or invent a verdict it cannot compute; there is also no MCP server, web UI, hosted attestation log or cross-harness memory format. v0.2 lists these on the roadmap rather than claiming them here."
         }
       }
     ]
